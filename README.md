@@ -1,2 +1,4 @@
-# cat-transf
-Repo for transformation of feature model to categories
+# Category Transformation
+Repo for transformation of feature model to categories.
+
+
