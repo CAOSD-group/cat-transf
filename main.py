@@ -1,5 +1,17 @@
+from famapy.metamodels.fm_metamodel.transformations import UVLReader
 
-def my_function(texto: str):
-    print(texto)
 
-my_function("Hola Adriana")
+fm = UVLReader(path='models/Pizzas.uvl').transform()
+
+for feature in fm.get_features():
+    if feature.parent is not None:
+        print(f'{feature.name} -> p: {feature.parent.name}')
+        if feature.is_mandatory():
+            print('is mandatory')
+    else:
+        print(f'Raíz: "{feature.name}"')
+
+
+
+
+
