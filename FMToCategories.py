@@ -21,6 +21,7 @@ class FMToCategories(ModelToText):
         ct_str = fm_to_categories(self.source_model)
         with open(self.path, 'w', encoding='utf-8') as file:
             file.write(ct_str)
+        return ct_str
 
 
 def fm_to_categories(feature_model: FeatureModel) -> str:
