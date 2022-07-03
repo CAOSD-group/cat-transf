@@ -12,7 +12,7 @@ def main(fm_path: str):
     fm_basename = os.path.basename(fm_path)
     fm_dirname = os.path.dirname(fm_path)
     fm_name = fm_basename[:fm_basename.find('.')]  # Remove extension
-    output_path = os.path.join(fm_dirname, fm_name, FMToCategories.get_destination_extension())
+    output_path = os.path.join(fm_dirname, fm_name + FMToCategories.get_destination_extension())
     
     # Load the feature model
     fm = UVLReader(fm_path).transform()
