@@ -25,4 +25,5 @@ class FMToCategories(ModelToText):
 
 
 def fm_to_categories(feature_model: FeatureModel) -> str:
-    pass
+    result = ''
+    return 'Hola'
