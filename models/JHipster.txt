@@ -1,0 +1,59 @@
+JHipster
+	xor Generator
+		xor Server
+			MicroserviceApplication
+			UaaServer
+		xor Application
+			MicroserviceGateway
+			Monolithic
+	xor Authentication
+		HTTPSession
+		OAuth2
+		Uaa
+		JWT
+	SocialLogin ?
+	xor Database ?
+		SQL
+			xor Hibernate2ndLvlCache ?
+				HazelCast
+				EhCache
+			xor Development
+				xor H2
+					DiskBased
+					InMemory
+				PostgreSQLDev
+				MariaDBDev
+				MySql
+			xor Production
+				MySQL
+				MariaDB
+				PostgreSQL
+			ElasticSearch ?
+		Cassandra
+		MongoDB
+	SpringWebSockets ?
+	Libsass ?
+	ClusteredSession ?
+	xor BackEnd
+		Gradle
+		Maven
+	InternationalizationSupport ?
+	Docker ?
+	TestingFrameworks
+		Protractor ?
+		Gatling
+		Cucumber
+
+[((OAuth2 && not SocialLogin) && not MicroserviceApplication) => (SQL || MongoDB)]
+[SocialLogin => (((HTTPSession || JWT) && Monolithic) && (SQL || MongoDB))]
+[UaaServer => Uaa]
+[((not OAuth2 && not SocialLogin) && not MicroserviceApplication) => ((SQL || MongoDB) || Cassandra)]
+[Server => not Protractor]
+[not Server => Protractor]
+[MySQL => (H2 || MySql)]
+[(MicroserviceApplication || MicroserviceGateway) => (JWT || Uaa)]
+[Monolithic => ((JWT || HTTPSession) || OAuth2)]
+[MariaDB => (H2 || MariaDBDev)]
+[PostgreSQL => (H2 || PostgreSQLDev)]
+[(SpringWebSockets || ClusteredSession) => Application]
+[Libsass => Application]

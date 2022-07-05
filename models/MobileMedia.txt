@@ -1,0 +1,47 @@
+MobileMedia2
+	or MediaSelection
+		Photo
+		Music
+			MusicPlayer
+		Video
+	MediaManagement
+		Favourites ?
+			SetFavourites
+			ViewFavourites
+		CopyMedia ?
+		SMSTransfer ?
+			ReceivePhoto ?
+			SendPhoto ?
+	xor ScreenSize
+		Screen1
+		Screen2
+		Screen3
+	Speakerphone
+	Calendar
+	Radio
+	CallManager
+	TVDigital ?
+	xor OS
+		Androide
+		WindowsMobile
+		Symbia
+		iOS
+	TouchScreen ?
+	or Connectivity ?
+		Bluetooth
+		or WiFi
+			Gmail
+			GoogleMaps
+			Youtube
+	GPS ?
+	xor ResolutionCamera ?
+		Resolution3MP
+		Resolution8MP
+	or Language
+		Portuguese
+		English
+		Spanish
+
+[Video || not ResolutionCamera]
+[Photo || not ResolutionCamera]
+[not CopyMedia || SMSTransfer]

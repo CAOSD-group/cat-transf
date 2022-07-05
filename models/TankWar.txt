@@ -1,0 +1,37 @@
+TankWar
+	xor Platform
+		PC
+		Handy
+	or Tools ?
+		Beschleunigung
+		einfrieren
+		Bombe
+		Energie
+		Feuerkraft
+		Mars
+	explodieren ?
+	GUI
+		xor Map
+			M_240
+			M_600
+			M_780
+		Image ?
+			fuer_PC ?
+			fuer_Handy ?
+			IMG_tool ?
+	xor Record ?
+		Re_fuer_PC
+		Re_fuer_Handy
+	xor Soundeffekt ?
+		Sound_fuer_pc
+		Sound_fuer_Handy
+	xor Language
+		EN
+		DE
+	or Tanks
+		USA_M1Abrams
+		Germany_Leopard
+		China_Type99
+	xor AI
+		Easy
+		Hard

@@ -25,7 +25,6 @@ class ClaferWriter(ModelToText):
 
 def fm_to_clafer(feature_model: FeatureModel) -> str:
 
-    #result = read_features(feature_model.root, '', -1)
     result = read_features2(feature_model.root, None, 0)
     for ctc in feature_model.get_constraints():
        result += read_constraints(ctc)
@@ -72,7 +71,7 @@ def read_constraints(const: Constraint) -> str:
 
 def serialize_constraint(ctc: Constraint) -> str:
     ctc = ctc.ast.pretty_str()
-    ctc = re.sub(fr'\b{ASTOperation.NOT.value}\ \b', 'not', ctc)
+    ctc = re.sub(fr'\b{ASTOperation.NOT.value}\ \b', 'not ', ctc)
     ctc = re.sub(fr'\b{ASTOperation.AND.value}\b', '&&', ctc)
     ctc = re.sub(fr'\b{ASTOperation.OR.value}\b', '||', ctc)
     ctc = re.sub(fr'\b{ASTOperation.IMPLIES.value}\b', '=>', ctc)
