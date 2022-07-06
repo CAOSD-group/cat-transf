@@ -2,11 +2,11 @@ import os
 from famapy.metamodels.fm_metamodel.transformations import UVLReader
 from famapy.metamodels.fm_metamodel.transformations import FeatureIDEReader
 
-from FMToCategories import FMToCategories
-from ClaferWriter import ClaferWriter
+from category_theory_writer import CategoryTheoryWriter
+from clafer_writer import ClaferWriter
 
 
-FM_PATH = 'models/default.xml'
+FM_PATH = 'models/input/Pizzas.uvl'
 
 
 def main(fm_path: str):
@@ -14,13 +14,13 @@ def main(fm_path: str):
     fm_basename = os.path.basename(fm_path)
     fm_dirname = os.path.dirname(fm_path)
     fm_name = fm_basename[:fm_basename.find('.')]  # Remove extension
-    output_path = os.path.join(fm_dirname, fm_name + ClaferWriter.get_destination_extension())
+    output_path = os.path.join('models/output/', fm_name + CategoryTheoryWriter.get_destination_extension())
     
     # Load the feature model
-    fm = FeatureIDEReader(fm_path).transform()
+    fm = UVLReader(fm_path).transform()
 
     # Transform the feature model to category theory
-    ct_str = ClaferWriter(path=output_path, source_model=fm).transform()
+    ct_str = CategoryTheoryWriter(path=output_path, source_model=fm).transform()
 
     # Print the result (optional)
     print(ct_str)
