@@ -71,7 +71,7 @@ def read_constraints(const: Constraint) -> str:
 
 def serialize_constraint(ctc: Constraint) -> str:
     ctc = ctc.ast.pretty_str()
-    ctc = re.sub(fr'\b{ASTOperation.NOT.value}\ \b', 'not ', ctc)
+    ctc = re.sub(fr'\b{ASTOperation.NOT.value}\b', 'not', ctc)
     ctc = re.sub(fr'\b{ASTOperation.AND.value}\b', '&&', ctc)
     ctc = re.sub(fr'\b{ASTOperation.OR.value}\b', '||', ctc)
     ctc = re.sub(fr'\b{ASTOperation.IMPLIES.value}\b', '=>', ctc)
