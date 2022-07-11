@@ -1,10 +1,12 @@
 
+from unittest import result
 from famapy.metamodels.fm_metamodel.models import (
     FeatureModel, 
     Feature,
     Relation,
     Constraint
 )
+from famapy.core.models.ast import AST, ASTOperation, Node
 
 
 # Root + feature + 1 mutex group
@@ -96,11 +98,26 @@ def get_case5() -> FeatureModel:
     return fm
 
 
-def get_constraints_from_card(feature: Feature, fm: FeatureModel) -> Constraint:
-    result = ''
-    
 
-    return result
+
+def each_tree(feature: Feature, card_min: int, card_max: int) -> AST:
+    for child in feature.get_children():
+        left = feature.get_children()[feature.get_children().index(child)]
+        right = AST.create_binary_operation(ASTOperation.AND, feature.get_children()[feature.get_children().index(child)+1], ASTOperation.AND).root
+    return AST.create_binary_operation(ASTOperation.AND, left, right).root
+
+
+def constraints_iteration(feature: Feature, card_min: int, card_max: int) -> Node:
+    return AST.create_binary_operation(ASTOperation.OR,
+                                        each_tree(feature, card_min, card_max),
+                                        constraints_iteration(feature, card_min, card_max)).root
+
+
+def get_constraints_from_card(feature: Feature, card_min: int, card_max: int) -> Constraint:
+    return AST.create_binary_operation(ASTOperation.IMPLIES,
+                                        feature.name,
+                                        constraints_iteration(feature, card_min, card_max)).root
+
 
 
 
@@ -163,9 +180,21 @@ def transform_cardinality(fm: FeatureModel, feature_name: str) -> FeatureModel:
         feature.add_relation(r_opt)
 
     feature.get_relations().remove(r_card)
-    # constraint = get_constraints_from_card(fm)
+    constraints = get_constraints_from_card(feature, r_card.card_min, r_card.card_max)
+
+    fm.ctcs = constraints
 
     return fm
+
+
+def is_mult_group_decomposition() -> bool:
+    pass
+
+def transform_mult_group_decomposition() -> FeatureModel:
+    pass
+
+# se coge como en el next pero es uno que se llama sum para que me devuelva cuántos hay
+# hacemos un método auxiliar para preguntar si es multiple group decomposition y ahí vamos comprobando
 
 
 
