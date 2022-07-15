@@ -79,32 +79,3 @@ instance VariabilityModelData = literal : VariabilityModelCategory {
   name(f12) = Salami cardinality(f12) = leaf optionality(f12) = false parent(f12) = f9
   
 }
-
-# Result Category for reasoning operations that generate configurations
-schema ConfigurationSpaceCategory = literal : Ty {
- entities
-  Product 
- attributes
-  r1 r2 r3: Product -> String
-}
-
-# Reasoning Operation Definition
-query ListAll = literal : VariabilityModelCategory -> ConfigurationSpaceCategory {
- entity 
-  Product -> {
-   from
-    f1 f2 f3 : Feature
-   where
-    f1.cardinality = leaf
-    f2.cardinality = leaf
-    f3.cardinality = leaf
-    not(f1.name, f2.name) = true not(f2.name, f3.name) = true not(f1.name, f3.name) = true
-   attributes
-    r1 -> f1.name
-    r2 -> f2.name
-    r3 -> f3.name
-  }
-}
-
-# Reasoning Execution (Populate Category B based on manipulating Category A data)
-instance ListAllData = eval ListAll VariabilityModelData

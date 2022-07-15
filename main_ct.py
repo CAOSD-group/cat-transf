@@ -6,7 +6,7 @@ from category_theory_writer import CategoryTheoryWriter
 from clafer_writer import ClaferWriter
 
 
-FM_PATH = 'models/input/Pizzas.uvl'
+FM_PATH = 'models/input/JHipster.uvl'
 
 
 def main(fm_path: str):
