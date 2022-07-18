@@ -124,7 +124,7 @@ def get_case6() -> FeatureModel:
 
 
 
-def get_case7() -> FeatureModel:
+def get_case7() -> FeatureModel:  #Complex prop. log. cross-tree constraint
     # Create features
     feature_root = Feature(name='Root')
 
@@ -138,6 +138,58 @@ def get_case7() -> FeatureModel:
     # Create the feature model
     fm = FeatureModel(root=feature_root)
     return fm
+
+
+
+
+def get_case8() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    f3 = Feature(name='F3', parent=feature_root)
+    # Create relations
+    r1 = Relation(feature_root, [f1, f2, f3], 1, 3)  # or
+    r2 = Relation(feature_root, [f3], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
+
+def get_case9() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    f3 = Feature(name='F3', parent=feature_root)
+    # Create relations
+    r1 = Relation(feature_root, [f1, f2, f3], 1, 1)  # xor
+    r2 = Relation(feature_root, [f3], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -368,6 +420,43 @@ def transform_cardinality(fm: FeatureModel, feature_name: str) -> FeatureModel:
 
 
 
+def transform_or_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel:
+    """Given a feature model, refactor the or group with mandatory child specified by its name."""
+    feature = fm.get_feature_by_name(feature_name)
+
+    if feature is None:
+        raise Exception(f'There is not feature with name "{feature_name}".')
+    if not feature.is_cardinality_group:
+        raise Exception(f'Feature {feature_name} is not a cardinality group.')
+    
+    return fm
+
+
+def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel:
+    """Given a feature model, refactor the xor group with mandatory child specified by its name."""
+    feature = fm.get_feature_by_name(feature_name)
+
+    if feature is None:
+        raise Exception(f'There is not feature with name "{feature_name}".')
+    if not feature.is_cardinality_group:
+        raise Exception(f'Feature {feature_name} is not a cardinality group.')
+    
+    return fm
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 def main():
     fm = get_case1()
     fm2 = get_case2()
@@ -375,56 +464,87 @@ def main():
     fm4 = get_case3()
     fm5 = get_case5()
     fm6 = get_case6()
+    fm7 = get_case7()
+    fm8 = get_case8()
+    fm9 = get_case9()
 
-    print('CASE 1')
+    print('CASE 1: MUTEX')
     print(fm)
     fm = transform_mutex(fm, 'F')
-    print('----------------------------------------')
+    print('RESULT: ----------------------------------------')
     print(fm)
 
     print('----------------------------------------------------------------')
 
-    print('CASE 2')
+    print('CASE 2: MUTEX')
     print(fm2)
     fm2 = transform_mutex(fm2, 'Root')
-    print('----------------------------------------')
+    print('RESULT: ----------------------------------------')
     print(fm2)
 
     print('----------------------------------------------------------------')
 
-    print('CASE 3')
+    print('CASE 3: MUTEX')
     print(fm3)
     fm3 = transform_mutex(fm3, 'Root')
-    print('----------------------------------------')
+    print('RESULT: ----------------------------------------')
     print(fm3)
     fm3 = transform_mutex(fm3, 'F2')
-    print('----------------------------------------')
+    print('RESULT: ----------------------------------------')
     print(fm3)
 
-    print('CASE 4')
+    print('CASE 4: MUTEX')
     print(fm4)
     fm4 = transform_mutex(fm4, 'F2')
     print('----------------------------------------')
     print(fm4)
     fm4 = transform_mutex(fm4, 'Root')
-    print('----------------------------------------')
+    print('RESULT: ----------------------------------------')
     print(fm4)
 
     print('----------------------------------------------------------------')
 
-    print('CASE 5')
-    print(fm5)
-    fm5 = transform_cardinality(fm5, 'Root')
-    print('----------------------------------------')
-    print(fm5)
+    # print('CASE 5: CARDINALITY')
+    # print(fm5)
+    # fm5 = transform_cardinality(fm5, 'Root')
+    # print('RESULT: ----------------------------------------')
+    # print(fm5)
+
+    # print('----------------------------------------------------------------')
+
+    print('CASE 6: MULT. GROUP DECOMPOSITION')
+    print(fm6)
+    fm6 = transform_mult_group_decomposition(fm6, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fm6)
+
+    # print('----------------------------------------------------------------')
+
+    # print('CASE 7: COMPLEX PROP. LOG. CROSS-TREE CONSTRAINT')
+    # print(fm7)
+    # fm7 = transform_mult_group_decomposition(fm7, 'Root')
+    # print('RESULT: ----------------------------------------')
+    # print(fm7)
 
     print('----------------------------------------------------------------')
 
-    print('CASE 6')
-    print(fm6)
-    fm6 = transform_mult_group_decomposition(fm6, 'Root')
-    print('----------------------------------------')
-    print(fm6)
+    print('CASE 8: OR + MANDATORY')
+    print(fm8)
+    fm8 = transform_or_mandatory(fm8, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fm8)
+
+    print('----------------------------------------------------------------')
+
+    print('CASE 9: XOR + MANDATORY')
+    print(fm9)
+    fm9 = transform_xor_mandatory(fm9, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fm9)
+
+
+
+
 
 
 
