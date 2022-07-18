@@ -1,7 +1,9 @@
 
 import itertools
 import functools
+from logging import root
 from typing import List
+from xmlrpc.client import Boolean
 from famapy.metamodels.fm_metamodel.models import (
     FeatureModel, 
     Feature,
@@ -417,7 +419,12 @@ def transform_cardinality(fm: FeatureModel, feature_name: str) -> FeatureModel:
 
 
 
-
+def is_there_mandatory(relations: List) -> bool:
+    mandatory = False
+    for rel in relations:
+        if rel.is_mandatory:
+            mandatory = True
+    return mandatory
 
 
 def transform_or_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel:
@@ -426,9 +433,25 @@ def transform_or_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel:
 
     if feature is None:
         raise Exception(f'There is not feature with name "{feature_name}".')
-    if not feature.is_cardinality_group:
-        raise Exception(f'Feature {feature_name} is not a cardinality group.')
-    
+    if not feature.is_or_group:
+        raise Exception(f'Feature {feature_name} is not an or group.')
+    if not is_there_mandatory(feature.get_relations()):
+        raise Exception(f'Feature {feature_name} has no mandatory child.')
+
+    r_or = next((r for r in feature.get_relations() if r.is_or()), None)
+
+    for child in r_or.children:
+        r_opt = Relation(feature, [child], 0, 1)  # optional
+        feature.add_relation(r_opt)
+        if child.is_mandatory():
+            r_mand = next((r for r in feature.get_relations() if r.is_mandatory()), None)
+            feature.get_relations().remove(r_opt)
+            feature.get_relations().remove(r_mand)
+            r_new_mand = Relation(feature, [child], 1, 1)  # mandatory
+            feature.add_relation(r_new_mand)
+
+    feature.get_relations().remove(r_or)
+
     return fm
 
 
@@ -438,9 +461,21 @@ def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel
 
     if feature is None:
         raise Exception(f'There is not feature with name "{feature_name}".')
-    if not feature.is_cardinality_group:
+    if not feature.is_alternative_group:
         raise Exception(f'Feature {feature_name} is not a cardinality group.')
     
+    r_card = next((r for r in feature.get_relations() if r.is_mutex()), None)
+    r_card.card_min = 0  # cardinality
+    
+    for child in r_card.children:
+        child.parent = feature
+
+    feature.get_relations().remove(r_card)
+
+    # Add relations to features
+    feature.add_relation(r_opt)
+    f_p.add_relation(r_mutex)
+
     return fm
 
 
