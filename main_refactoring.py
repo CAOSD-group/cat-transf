@@ -464,17 +464,27 @@ def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel
     if not feature.is_alternative_group:
         raise Exception(f'Feature {feature_name} is not a cardinality group.')
     
-    r_card = next((r for r in feature.get_relations() if r.is_mutex()), None)
-    r_card.card_min = 0  # cardinality
+    r_alt = next((r for r in feature.get_relations() if r.is_alternative()), None)
+    r_alt.card_min = 0
+    r_alt.card_max = 0
     
-    for child in r_card.children:
-        child.parent = feature
 
-    feature.get_relations().remove(r_card)
+    children_list = []
+    for child in r_alt.children:
+        if child.is_mandatory():
+            r_mand = next((r for r in feature.get_relations() if r.is_mandatory()), None)
+            feature.get_relations().remove(r_mand)
+            r_new_mand = Relation(feature, [child], 1, 1)  # mandatory
+            feature.add_relation(r_new_mand)
+        else:
+            children_list.append(child)
+
+    feature.get_relations().remove(r_alt)
+
+    r_opt = Relation(feature, children_list, 0, 0)  # dead
 
     # Add relations to features
     feature.add_relation(r_opt)
-    f_p.add_relation(r_mutex)
 
     return fm
 
