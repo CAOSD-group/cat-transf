@@ -143,7 +143,7 @@ def get_case7() -> FeatureModel:  #Complex prop. log. cross-tree constraint
 
 
 
-
+# OR + Mandatory
 def get_case8() -> FeatureModel:
     # Create features
     feature_root = Feature(name='Root')
@@ -163,6 +163,8 @@ def get_case8() -> FeatureModel:
     return fm
 
 
+
+# XOR + Mandatory
 def get_case9() -> FeatureModel:
     # Create features
     feature_root = Feature(name='Root')
@@ -180,6 +182,78 @@ def get_case9() -> FeatureModel:
     # Create the feature model
     fm = FeatureModel(root=feature_root)
     return fm
+
+
+
+
+# OR + Mandatory
+def get_case10() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    f3 = Feature(name='F3', parent=feature_root)
+    # Create relations
+    r1 = Relation(feature_root, [f1, f2, f3], 1, 3)  # or
+    r2 = Relation(feature_root, [f2], 1, 1)  # mandatory
+    r3 = Relation(feature_root, [f3], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+    feature_root.add_relation(r3)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
+
+
+# XOR + Mandatory
+def get_case11() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    f3 = Feature(name='F3', parent=feature_root)
+    # Create relations
+    r1 = Relation(feature_root, [f1, f2, f3], 1, 1)  # xor
+    r2 = Relation(feature_root, [f2], 1, 1)  # mandatory
+    r3 = Relation(feature_root, [f3], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+    feature_root.add_relation(r3)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
+
+
+# XOR + Mandatory
+def get_case12() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    # Create relations
+    r1 = Relation(feature_root, [f1, f2], 1, 1)  # xor
+    r2 = Relation(feature_root, [f2], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
+
+
+
+
 
 
 
@@ -280,7 +354,7 @@ def get_new_feature_name(fm: FeatureModel, name: str) -> str:
 
 
 
-def transform_complex_crosstree_contraint(fm: FeatureModel, feature_name: str, ctc: Constraint) -> FeatureModel:
+def transform_complex_crosstree_constraint(fm: FeatureModel, feature_name: str, ctc: Constraint) -> FeatureModel:
     """Given a feature model, refactor the complex prop. log. cress-tree constraint."""
     feature = fm.get_feature_by_name(feature_name)
 
@@ -355,7 +429,6 @@ def transform_mult_group_decomposition(fm: FeatureModel, feature_name: str) -> F
         if r.is_group():
             fm = new_decomposition(fm, feature, r)
 
-
     return fm
 
 
@@ -411,7 +484,7 @@ def transform_cardinality(fm: FeatureModel, feature_name: str) -> FeatureModel:
     feature.get_relations().remove(r_card)
 
     constraint = get_constraint_for_cardinality_group(feature, r_card)
-    print(f'Cosntraint: {constraint}')
+    print(f'Constraint: {constraint}')
     fm.ctcs.append(constraint)
 
     return fm
@@ -470,8 +543,10 @@ def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel
     
 
     children_list = []
+    count = 0
     for child in r_alt.children:
         if child.is_mandatory():
+            count += 1
             r_mand = next((r for r in feature.get_relations() if r.is_mandatory()), None)
             feature.get_relations().remove(r_mand)
             r_new_mand = Relation(feature, [child], 1, 1)  # mandatory
@@ -479,9 +554,17 @@ def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel
         else:
             children_list.append(child)
 
+    if count>1:
+         raise Exception(f'More mandatory children than expected.')
+
     feature.get_relations().remove(r_alt)
 
-    r_opt = Relation(feature, children_list, 0, 0)  # dead
+    if len(children_list)<=1:
+        r_opt = Relation(feature, children_list, 0, 1)  # optional
+        constraint = AST.create_unary_operation(ASTOperation.NOT, children_list[0]).root
+        fm.ctcs.append(constraint)
+    else:
+        r_opt = Relation(feature, children_list, 0, 0)  # dead
 
     # Add relations to features
     feature.add_relation(r_opt)
@@ -512,6 +595,9 @@ def main():
     fm7 = get_case7()
     fm8 = get_case8()
     fm9 = get_case9()
+    fm10 = get_case10()
+    fm11 = get_case11()
+    fm12 = get_case12()
 
     print('CASE 1: MUTEX')
     print(fm)
@@ -563,11 +649,11 @@ def main():
     print('RESULT: ----------------------------------------')
     print(fm6)
 
-    # print('----------------------------------------------------------------')
+    print('----------------------------------------------------------------')
 
     # print('CASE 7: COMPLEX PROP. LOG. CROSS-TREE CONSTRAINT')
     # print(fm7)
-    # fm7 = transform_mult_group_decomposition(fm7, 'Root')
+    # fm7 = transform_complex_crosstree_constraint(fm7, 'Root')
     # print('RESULT: ----------------------------------------')
     # print(fm7)
 
@@ -586,6 +672,30 @@ def main():
     fm9 = transform_xor_mandatory(fm9, 'Root')
     print('RESULT: ----------------------------------------')
     print(fm9)
+
+    print('----------------------------------------------------------------')
+
+    print('CASE 10: OR + MANDATORY')
+    print(fm10)
+    fm10 = transform_or_mandatory(fm10, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fm10)
+
+    # print('----------------------------------------------------------------')
+
+    # print('CASE 11: XOR + MANDATORY')
+    # print(fm11)
+    # fm11 = transform_xor_mandatory(fm11, 'Root')
+    # print('RESULT: ----------------------------------------')
+    # print(fm11)
+
+    print('----------------------------------------------------------------')
+
+    print('CASE 12: XOR + MANDATORY')
+    print(fm12)
+    fm12 = transform_xor_mandatory(fm12, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fm12)
 
 
 
