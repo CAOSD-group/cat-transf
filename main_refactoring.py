@@ -252,6 +252,44 @@ def get_case12() -> FeatureModel:
 
 
 
+# XOR + Mandatory
+def get_caseBC4() -> FeatureModel:
+    # Create features
+    feature_root = Feature(name='Root')
+    f1 = Feature(name='F1', parent=feature_root)
+    f2 = Feature(name='F2', parent=feature_root)
+    f3 = Feature(name='F3', parent=feature_root)
+    f1a = Feature(name='F1a', parent=f1)
+    f1b = Feature(name='F1b', parent=f1)
+    f1c = Feature(name='F1c', parent=f1)
+    f2a = Feature(name='F2a', parent=f2)
+    f2a1 = Feature(name='F2a1', parent=f2a)
+    f2a2 = Feature(name='F2a2', parent=f2a)
+    f2a3 = Feature(name='F2a3', parent=f2a)
+    # Create relations
+    r1 = Relation(feature_root, [f1], 0, 1)  # optional
+    r2 = Relation(feature_root, [f2], 1, 1)  # mandatory
+    r3 = Relation(feature_root, [f3], 1, 1)  # mandatory
+    r11 = Relation(f1, [f1a, f1b, f1c], 1, 1)  # xor
+    r11mand = Relation(f1, [f1c], 1, 1)  # mandatory
+    r2mand = Relation(f2, [f2a], 1, 1)  # mandatory
+    r2xor = Relation(f2a, [f2a1, f2a2, f2a3], 1, 1)  # xor
+    r21mand = Relation(f2a, [f2a3], 1, 1)  # mandatory
+
+    # Add relations to features
+    feature_root.add_relation(r1)
+    feature_root.add_relation(r2)
+    feature_root.add_relation(r3)
+    feature_root.add_relation(r11)
+    feature_root.add_relation(r11mand)
+    feature_root.add_relation(r2mand)
+    feature_root.add_relation(r2xor)
+    feature_root.add_relation(r21mand)
+
+    # Create the feature model
+    fm = FeatureModel(root=feature_root)
+    return fm
+
 
 
 
@@ -598,6 +636,7 @@ def main():
     fm10 = get_case10()
     fm11 = get_case11()
     fm12 = get_case12()
+    fmBC4 = get_caseBC4()
 
     print('CASE 1: MUTEX')
     print(fm)
@@ -697,6 +736,13 @@ def main():
     print('RESULT: ----------------------------------------')
     print(fm12)
 
+    print('----------------------------------------------------------------')
+
+    print('CASE BC4: XOR + MANDATORY')
+    print(fmBC4)
+    fmBC4 = transform_xor_mandatory(fmBC4, 'Root')
+    print('RESULT: ----------------------------------------')
+    print(fmBC4)
 
 
 
