@@ -82,7 +82,7 @@ def get_case3() -> FeatureModel:
 
 
 
-
+# CARDINALITY
 def get_case5() -> FeatureModel:
     # Create features
     feature_root = Feature(name='Root')
