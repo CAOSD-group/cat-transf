@@ -572,8 +572,8 @@ def transform_xor_mandatory(fm: FeatureModel, feature_name: str) -> FeatureModel
 
     if feature is None:
         raise Exception(f'There is not feature with name "{feature_name}".')
-    if not feature.is_alternative_group:
-        raise Exception(f'Feature {feature_name} is not a cardinality group.')
+    if not feature.is_alternative_group():
+        raise Exception(f'Feature {feature_name} is not alternative group.')
     
     r_alt = next((r for r in feature.get_relations() if r.is_alternative()), None)
     r_alt.card_min = 0
