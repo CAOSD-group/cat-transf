@@ -1,11 +1,12 @@
 import jinja2
 
-from famapy.core.transformations import ModelToText
-
-from famapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relation, Constraint
+from flamapy.core.transformations import ModelToText
+from flamapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relation, Constraint
 
 
 CATEGORY_THEORY_TEMPLATE = 'category_theory_template.cql'
+NUMERICAL_FEATURE_ATTRIBUTE = '@numerical'
+NUMERICAL_FEATURE_DOMAIN = 'Int'
 
 
 class CategoryTheoryWriter(ModelToText):
@@ -40,12 +41,17 @@ def fm_to_categories(feature_model: FeatureModel) -> str:
 
 def get_maps(feature_model: FeatureModel) -> dict[str, str]:
     result = {}
-    features_map = get_features_map(feature_model)
-    result['features_list'] = ' '.join([f['id'] for f in features_map])
-    result['features_dict'] = features_map
+    boolean_features_map = get_boolean_features_map(feature_model)
+    numerical_features_map = get_numerical_features_map(feature_model)
+    feature_attributes_map = get_features_attributes_map(feature_model)
+    result['features_list'] = ' '.join([f['id'] for f in boolean_features_map])
+    result['boolean_features_dict'] = boolean_features_map
+    result['numerical_features_dict'] = numerical_features_map
+    result['feature_attributes_dict'] = feature_attributes_map
     return result
 
-def get_features_map(feature_model: FeatureModel) -> list[dict[str, str]]:
+
+def get_boolean_features_map(feature_model: FeatureModel) -> list[dict[str, str]]:
     result = []
     features = [(feature_model.root, None)]
     count = 1
@@ -60,6 +66,10 @@ def get_features_map(feature_model: FeatureModel) -> list[dict[str, str]]:
         feature_dict['cardinality'] = get_cardinality(feature)
         feature_dict['optionality'] = str(feature.is_optional()).lower()
         feature_dict['parent'] = parent if parent is not None else feature_id
+        feature_dict['attributes'] = []
+
+        feature_dict['domain'] = NUMERICAL_FEATURE_DOMAIN
+        feature_dict['value'] = 1
 
         result.append(feature_dict)
 
@@ -99,17 +109,5 @@ def get_parent_id(result: list[dict[str, str]], parent: Feature, feature_id: str
     return next((f['id'] for f in result if f['name'] == parent.name), None)
 
 
-
-
-
-
-
-'''
-name({{feature.id}}) = {{feature.name}}
-cardinality({{feature.id}}) = {{feature.cardinality}}
-optionality({{feature.id}}) = {{feature.optionality}}
-parent({{feature.id}}) = {{feature.parent}}
-'''
-
-
-
+def is_numerical_feature(feature: Feature) -> bool:
+    return any(attribute for attribute in feature.get_attributes() if attribute.get_name() == NUMERICAL_FEATURE_ATTRIBUTE)
