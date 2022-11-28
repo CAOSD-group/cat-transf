@@ -1,12 +1,24 @@
+import ast
+from typing import Any 
+from enum import Enum
+
 import jinja2
+import random
 
 from flamapy.core.transformations import ModelToText
 from flamapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relation, Constraint
 
 
 CATEGORY_THEORY_TEMPLATE = 'category_theory_template.cql'
-NUMERICAL_FEATURE_ATTRIBUTE = '@numerical'
+NUMERICAL_FEATURE_ATTRIBUTE = 'NF'
 NUMERICAL_FEATURE_DOMAIN = 'Int'
+
+
+class CTAttributeType(Enum):
+    BOOL = 'Bool'
+    STRING = 'String'
+    INT = 'Integer'
+    DOUBLE = 'Double'
 
 
 class CategoryTheoryWriter(ModelToText):
@@ -41,42 +53,108 @@ def fm_to_categories(feature_model: FeatureModel) -> str:
 
 def get_maps(feature_model: FeatureModel) -> dict[str, str]:
     result = {}
-    boolean_features_map = get_boolean_features_map(feature_model)
-    numerical_features_map = get_numerical_features_map(feature_model)
+    all_features_map = get_all_features_map(feature_model)
     feature_attributes_map = get_features_attributes_map(feature_model)
-    result['features_list'] = ' '.join([f['id'] for f in boolean_features_map])
-    result['boolean_features_dict'] = boolean_features_map
-    result['numerical_features_dict'] = numerical_features_map
+    result['features_list'] = ' '.join([f['id'] for f in all_features_map])
+    result['boolean_features_dict'] = [d for d in all_features_map if not is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
+    result['numerical_features_dict'] = [d for d in all_features_map if is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
     result['feature_attributes_dict'] = feature_attributes_map
     return result
 
 
-def get_boolean_features_map(feature_model: FeatureModel) -> list[dict[str, str]]:
+def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
     result = []
-    features = [(feature_model.root, None)]
     count = 1
+    nf_count = 1
+    features = [(feature_model.root, None)]
     while features:
         feature, parent = features.pop()
-        feature_id = f'f{count}'
-        count += 1
-        # Create dictionary for feature
-        feature_dict = {}
-        feature_dict['id'] = feature_id
-        feature_dict['name'] = feature.name
-        feature_dict['cardinality'] = get_cardinality(feature)
-        feature_dict['optionality'] = str(feature.is_optional()).lower()
-        feature_dict['parent'] = parent if parent is not None else feature_id
-        feature_dict['attributes'] = []
-
-        feature_dict['domain'] = NUMERICAL_FEATURE_DOMAIN
-        feature_dict['value'] = 1
-
-        result.append(feature_dict)
+        if not is_numerical_feature(feature):
+            feature_id = f'f{count}'
+            count += 1
+            # Create dictionary for feature
+            feature_dict = {}
+            feature_dict['id'] = feature_id
+            feature_dict['name'] = feature.name
+            feature_dict['cardinality'] = get_cardinality(feature)
+            feature_dict['optionality'] = str(feature.is_optional()).lower()
+            feature_dict['parent'] = parent if parent is not None else feature_id
+            feature_dict['attributes'] = [{'name': a.name, 'value': a.get_default_value()} 
+                                        for a in feature.get_attributes() 
+                                            if a.name != NUMERICAL_FEATURE_ATTRIBUTE]
+            result.append(feature_dict)
+        else:
+            # It is numerical feature
+            for v in get_numerical_value(feature):
+                feature_id = f'nf{nf_count}'
+                nf_count += 1
+                # Create dictionary for feature
+                feature_dict = {}
+                feature_dict['id'] = feature_id
+                feature_dict['name'] = feature.name
+                feature_dict['cardinality'] = get_cardinality(feature)
+                feature_dict['optionality'] = str(feature.is_optional()).lower()
+                feature_dict['parent'] = parent if parent is not None else feature_id
+                feature_dict['attributes'] = [{'name': a.name, 'value': a.get_default_value()} 
+                                            for a in feature.get_attributes() 
+                                                if a.name != NUMERICAL_FEATURE_ATTRIBUTE]
+                feature_dict['domain'] = CTAttributeType.INT.value
+                feature_dict['nf_value'] = v
+                result.append(feature_dict)
 
         # Process children
         for child in feature.get_children():
             features.append((child, feature_id))
     return result
+
+
+def get_features_attributes_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
+    features = [feature_model.root]
+    attributes_dict = {}
+    while features:
+        feature = features.pop()
+        for attr in feature.get_attributes():
+            if attr.name != NUMERICAL_FEATURE_ATTRIBUTE:
+                attributes_dict[attr.name] = parse_type_value(attr.get_default_value())  # string representando el tipo (string, int, float...)
+
+        # Process children
+        for child in feature.get_children():
+            features.append(child)
+
+    result = []
+    for k, t in attributes_dict.items():
+        result.append({'name': k, 'type': t})
+    return result
+
+def get_numerical_value(feature: Feature) -> list[Any]:
+    values = []
+    for attribute in feature.get_attributes():
+        if attribute.name == NUMERICAL_FEATURE_ATTRIBUTE:
+            values = ast.literal_eval(attribute.get_default_value())
+            if len(values) == 2:
+                values = range(values[0], values[1] + 1)
+    return values
+
+def parse_type_value(value: str) -> str:
+    """Given a value represented in a string, returns the associated type in category theory."""
+    result = None
+    if value.lower() in ['true', 'false']:
+        result = CTAttributeType.BOOL
+    else:
+        try:
+            int(value)
+            result = CTAttributeType.INT
+        except:
+            pass
+        if result is None:
+            try:
+                float(value)
+                result = CTAttributeType.DOUBLE
+            except:
+                pass
+        if result is None:
+            result = CTAttributeType.STRING
+    return result.value
 
     # for i, feature in enumerate(features, 1):
     #     feature_dict = {}

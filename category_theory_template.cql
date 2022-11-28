@@ -58,8 +58,7 @@ schema VariabilityModelCategory = literal : Ty {
     value        : Feature -> Integer     # Numerical Feature Value
 
     # Attributed Variability Model Arrow
-    {% for attribute in feature_attributes_dict %}
-    {{attribute.name}}: Feature -> {{attribute.type}}
+    {% for attribute in feature_attributes_dict %}{{attribute.name}}: Feature -> {{attribute.type}}
     {% endfor %}
 }
 
@@ -72,20 +71,15 @@ instance VariabilityModelData = literal : VariabilityModelCategory {
 
   equations
   # Boolean features
-    {% for feature in features_dict %}
-    name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}}
-    {% for attribute in feature.attributes %}
-      {{attribute.name}}({{feature.id}}) = {{attribute.value}}
+    {% for feature in boolean_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}}
+    {% for attribute in feature.attributes %}  {{attribute.name}}({{feature.id}}) = {{attribute.value}}
     {% endfor %}
     {% endfor %}
 
   # Numerical features
-    {% for feature in numerical_features_dict %}
-      {% for value in feature.values %}
-    name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} domain({{feature.id}}) = {{feature.domain}} value({{feature.id}}) = {{value}}
-      {% for attribute in feature.attributes %}
-        {{attribute.name}}({{feature.id}}) = {{attribute.value}}
-      {% endfor %}
-      {% endfor %}
-    {% endfor %}
+  {% for feature in numerical_features_dict %}
+  name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} domain({{feature.id}}) = {{feature.domain}} value({{feature.id}}) = {{feature.nf_value}}
+  {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
+  {% endfor %}
+  {% endfor %}
 }

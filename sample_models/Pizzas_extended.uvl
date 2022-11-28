@@ -19,8 +19,8 @@ features
 
 		optional
 			CheesyCrust
-			Salt {@numerical "[1,3,5]", cost "0.5", vegan "true", provider "Mercadona"}
-			Pepper {@numerical "[1,5]", cost "0.5", vegan "true", provider "Mercadona"}
+			Salt {NF "[1,3,5]", cost "0.5", vegan "true", provider "Mercadona"}
+			Pepper {NF "[1,5]", cost "0.5", vegan "true", provider "Mercadona"}
 
 constraints
 	CheesyCrust => Big
