@@ -1,6 +1,6 @@
 import os
-from famapy.metamodels.fm_metamodel.transformations import UVLReader
-from famapy.metamodels.fm_metamodel.transformations import FeatureIDEReader
+from flamapy.metamodels.fm_metamodel.transformations import UVLReader
+from flamapy.metamodels.fm_metamodel.transformations import FeatureIDEReader
 
 from category_theory_writer import CategoryTheoryWriter
 from clafer_writer import ClaferWriter
