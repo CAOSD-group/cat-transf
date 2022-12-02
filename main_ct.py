@@ -10,6 +10,7 @@ from flamapy.metamodels.bdd_metamodel.operations import BDDProductsNumber, BDDPr
 
 from category_theory_writer import CategoryTheoryWriter
 from configurations_attributes_writer import ConfigurationsAttributesWriter
+from configurations_attributes_reader import ConfigurationsAttributesReader
 
 
 ATTRIBUTES_TYPES = ['int', 'double', 'bool']
@@ -19,14 +20,19 @@ def main(fm_path: str, sample_size: int, attributes_types: list[str] = []):
     # Load the feature model
     fm = UVLReader(fm_path).transform()
 
+
     # Create path to the output file
     fm_basename = os.path.basename(fm_path)
     fm_dirname = os.path.dirname(fm_path)
     fm_name = fm_basename[:fm_basename.find('.')]  # Remove extension
     output_path = os.path.join(fm_dirname, fm_name + CategoryTheoryWriter.get_destination_extension())
+    csv_path = os.path.join('config.csv')
+
+    # Load de configurations with attribute
+    configs = ConfigurationsAttributesReader(path=csv_path, source_model=fm).transform()
 
     # Transform the feature model to category theory
-    ct_str = CategoryTheoryWriter(path=output_path, source_model=fm).transform()
+    # ct_str = CategoryTheoryWriter(path=output_path, source_model=fm, configurations_attr=configs).transform()
 
     # Obtain the sample using the BDD
     bdd_model = FmToBDD(fm).transform()

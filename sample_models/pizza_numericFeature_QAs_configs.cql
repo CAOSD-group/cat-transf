@@ -61,7 +61,7 @@ schema VariabilityModelCategory = literal : Ty {
   # VM-QM Linkage entities
   CCs # Features forming a complete configuration
   QAs # Sets of QAs
-  QMC # Span relating CCs with a set of QAs.
+  QMC # Span relating CCs with a set of QAs
   
  # (Mandatory) Functorial Relation Arrows
  foreign_keys

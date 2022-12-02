@@ -1,0 +1,6 @@
+Pizza,Topping,Salami,Ham,Mozzarella,Size,Normal,Big,Dough,Neapolitan,Sicilian,CheesyCrust,Attribute1,Attribute2,Attribute3,Attribute4
+True,True,True,False,False,True,False,True,True,False,True,False,67,63,true,0.6026
+True,True,False,False,True,True,True,False,True,False,True,False,75,67,false,0.6927
+True,True,False,True,False,True,True,False,True,True,False,False,12,35,true,0.1399
+True,True,True,True,False,True,False,True,True,False,True,False,63,68,true,0.1155
+True,True,True,False,False,True,True,False,True,True,False,False,29,27,true,0.9264
