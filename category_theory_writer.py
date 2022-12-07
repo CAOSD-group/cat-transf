@@ -28,7 +28,7 @@ class CategoryTheoryWriter(ModelToText):
     def get_destination_extension() -> str:
         return '.cql'
 
-    def __init__(self, path: str, source_model: FeatureModel, configurations_attr: tuple) -> None:
+    def __init__(self, path: str, source_model: FeatureModel, configurations_attr: list) -> None:
         self.path = path
         self.source_model = source_model
         self.configurations_attr = configurations_attr
@@ -40,7 +40,7 @@ class CategoryTheoryWriter(ModelToText):
         return ct_str
 
 
-def fm_to_categories(feature_model: FeatureModel, c_attr: tuple) -> str:
+def fm_to_categories(feature_model: FeatureModel, c_attr: list) -> str:
     template_loader = jinja2.FileSystemLoader(searchpath='./')
     environment = jinja2.Environment(loader=template_loader)
     template = environment.get_template(CATEGORY_THEORY_TEMPLATE)
@@ -49,35 +49,44 @@ def fm_to_categories(feature_model: FeatureModel, c_attr: tuple) -> str:
     return content
 
 
-def get_maps(feature_model: FeatureModel, c_attr: tuple) -> dict[str, str]:
+def get_maps(feature_model: FeatureModel, c_attr: list=None) -> dict[str, str]:
     result = {}
     all_features_map = get_all_features_map(feature_model)
     feature_attributes_map = get_features_attributes_map(feature_model)
-    virtual_linkages = get_virtual_linkages(c_attr)
-    qn_map = get_qn_map(feature_model)
-    qv_map = get_qv_map(feature_model)
-    qd_map = get_qd_map(feature_model)
-    qs_map = get_qs_map(feature_model)
-    qas_map = get_qas_map(feature_model)
-    ccs_map = get_ccs_map(feature_model)
-    qmc_map = get_qmc_map(feature_model)
     result['features_list'] = ' '.join([f['id'] for f in all_features_map])
-    result['qn_list'] = ' '.join([qn['id'] for qn in qn_map])
-    result['qv_list'] = ' '.join([qv['id'] for qv in qv_map])
-    result['qd_list'] = ' '.join([qd['id'] for qd in qd_map])
-    result['qs_list'] = ' '.join([qs['id'] for qs in qs_map])
-    result['qas_list'] = ' '.join([qas['id'] for qas in qas_map])
-    result['ccs_list'] = ' '.join([ccs['id'] for ccs in ccs_map])
-    result['qmc_list'] = ' '.join([qmc['id'] for qmc in qmc_map])
     result['boolean_features_dict'] = [d for d in all_features_map if not is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
     result['numerical_features_dict'] = [d for d in all_features_map if is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
     result['feature_attributes_dict'] = feature_attributes_map
-    result['cc_virutal_linkages_dict'] = virtual_linkages
-    result['quality_names_dict'] = feature_attributes_map
-    result['quality_domains_dict'] = feature_attributes_map
-    result['quality_values_dict'] = feature_attributes_map
-    result['quality_attributes_dict'] = feature_attributes_map
-    result['quality_model_dict'] = feature_attributes_map
+    if not c_attr is None:
+        virtual_linkages = get_virtual_linkages(c_attr)
+        qn_map = get_qn_map(c_attr)
+        result['qn_list'] = ' '.join([qn['id'] for qn in qn_map])
+
+        qv_map = get_qv_map(c_attr, qn_map)
+        result['qv_list'] = ' '.join([qv['id'] for qv in qv_map])
+        print(f'qv list: {[qv["id"] for qv in qv_map]}')
+
+        qd_map = get_qd_map(c_attr)
+        result['qd_list'] = ' '.join([qd for qd in qd_map])
+
+        qs_map = get_qs_map(c_attr)
+        result['qs_list'] = ' '.join([qs for qs in qs_map])
+
+        qas_map = get_qas_map(c_attr)
+        result['qas_list'] = ' '.join([qas for qas in qas_map])
+
+        ccs_map = get_ccs_map(c_attr)
+        result['ccs_list'] = ' '.join([ccs for ccs in ccs_map])
+
+        qmc_map = get_qmc_map(c_attr)
+        result['qmc_list'] = ' '.join([qmc for qmc in qmc_map])
+    
+        result['cc_virutal_linkages_dict'] = virtual_linkages
+        result['quality_names_dict'] = feature_attributes_map
+        result['quality_domains_dict'] = feature_attributes_map
+        result['quality_values_dict'] = feature_attributes_map
+        result['quality_attributes_dict'] = feature_attributes_map
+        result['quality_model_dict'] = feature_attributes_map
     return result
 
 
@@ -191,30 +200,55 @@ def is_numerical_feature(feature: Feature) -> bool:
     return any(attribute for attribute in feature.get_attributes() if attribute.get_name() == NUMERICAL_FEATURE_ATTRIBUTE)
 
 def get_virtual_linkages(c_attr: list[tuple]):
-    virtual_linkages_dict = {}
-    for i, tuple in c_attr:
-        virtual_linkages_dict['id'] = c_attr[i]
-        features = tuple[0]
-        for feature in features:
-            virtual_linkages_dict['feature'] = 
-
-def get_qn_map(feature_model: FeatureModel):
+    # virtual_linkages_dict = {}
+    # for i, tuple in c_attr:
+    #     virtual_linkages_dict['id'] = c_attr[i]
+    #     features = tuple[0]
+    #     for feature in features:
+    #         virtual_linkages_dict['feature'] = 
     pass
 
-def get_qv_map(feature_model: FeatureModel):
+def get_qn_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> list[str]:
+    names = []
+    tup = c_attr[0]
+    attributes_tuple = tup[1]
+    attributes_dict = next(attr for attr in attributes_tuple.values())
+    qn_count = 1
+    for attribute in attributes_dict.keys():
+        qn_id = f'qn{qn_count}'
+        qn_count += 1
+        qn_dict = {}
+        qn_dict['id'] = qn_id
+        qn_dict['name'] = attribute
+        names.append(qn_dict)
+    print(f'names: {[name for name in names]}')
+    return names
+
+def get_qv_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]], names: list[dict[str,str]]):
+    values = set()
+    for tup in c_attr:
+        attr_dict = tup[1]
+        attributes = next(attr for attr in attr_dict.values())
+        qv_list = []  # lista de valores agrupados por nombre
+        names_list = [qn['name'] for qn in names]
+        qv_count = 1
+        for name in names:
+            qv_id = f'qv{qv_count}'
+            qn_count += 1
+            attributes[qv_id] = qv_list
     pass
 
-def get_qd_map(feature_model: FeatureModel):
+def get_qd_map(c_attr: list):
     pass
 
-def get_qs_map(feature_model: FeatureModel):
+def get_qs_map(c_attr: list):
     pass
 
-def get_qas_map(feature_model: FeatureModel):
+def get_qas_map(c_attr: list):
     pass
 
-def get_ccs_map(feature_model: FeatureModel):
+def get_ccs_map(c_attr: list):
     pass
 
-def get_qmc_map(feature_model: FeatureModel):
+def get_qmc_map(c_attr: list):
     pass
