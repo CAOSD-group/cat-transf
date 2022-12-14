@@ -38,19 +38,11 @@ def main(fm_path: str, sample_size: int, attributes_types: list[str] = []):
     # Load the feature model
     fm = UVLReader(fm_path).transform()
 
-
     # Create path to the output file
     fm_basename = os.path.basename(fm_path)
     fm_dirname = os.path.dirname(fm_path)
     fm_name = fm_basename[:fm_basename.find('.')]  # Remove extension
     output_path = os.path.join(fm_dirname, fm_name + CategoryTheoryWriter.get_destination_extension())
-    csv_path = os.path.join('config.csv')
-
-    # Load csv file
-    configs = ConfigurationsAttributesReader(path=csv_path, source_model=fm).transform()
-
-    # Transform the feature model to category theory
-    ct_str = CategoryTheoryWriter(path=output_path, source_model=fm, configurations_attr=configs).transform()
 
     # Obtain the sample using the BDD
     bdd_model = FmToBDD(fm).transform()
@@ -84,8 +76,10 @@ if __name__ == '__main__':
             attributes_types = [a.lower() for a in args.attribute]
     
     if args.csv:
+        print("Main CSV")
         main_csv(args.feature_model, args.csv)
     else:
+        print("Main")
         main(args.feature_model, args.size, attributes_types)
     
         

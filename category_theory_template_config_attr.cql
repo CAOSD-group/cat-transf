@@ -138,32 +138,32 @@ instance VariabilityModelData = literal : VariabilityModelCategory {
   {% endfor %}
 
   # CC Virtual Linkages
-  {% for ccn in cc_virutal_linkages_dict %}
-  id({{ccn.id}}) = {{TODO}} feature({{ccn.id}}) = {{feature.id}}
+  {% for cc in cc_virutal_linkages_dict %}
+  id({{cc.id}}) = {{cc.id}} feature({{cc.id}}) = {{feature.id}}
   {% endfor %}
 
 
   # Variant-wise Quality Names and Domains
-  {% for qnn in quality_names_dict %}
-  name({{qnn.id}}) = {{TODO}}
+  {% for qn in quality_names_dict %}
+  name({{qn.id}}) = {{qn.name}}
   {% endfor %}
-  {% for qdn in quality_domains_dict %}
-  domain({{qdn.id}}) = {{TODO}}
+  {% for qd in quality_domains_dict %}
+  domain({{qd.id}}) = {{qd.domain}}
   {% endfor %}
 
   # Quality Values
-  {% for qvn in quality_values_dict %}
-  domain({{qvn.id}}) = {{TODO}}
+  {% for qv in quality_values_dict %}
+  domain({{qv.id}}) = {{qv.value}}
   {% endfor %}
 
   # Qualities
-  {% for qsn in qualities_dict %}
-  name({{qsn.id}}) = {{qnn}} value({{qsn.id}}) = {{qvn}} domain({{qsn.id}}) = {{qdn}}  # TODO
+  {% for qs in qualities_dict %}
+  name({{qs.id}}) = {{sq.value.qn}} value({{qs.id}}) = {{sq.value.qv}} domain({{qs.id}}) = {{sq.value.qd}}
   {% endfor %}
 
   # QAs Sets
-  {% for qan in quality_attributes_dict %}
-  id({{qan}}) = {{TODO}} qualities({{qan}}) = {{TODO}}  # TODO
+  {% for qa in quality_attributes_dict %}
+  id({{qa}}) = {{qa.index}} qualities({{qa}}) = {{qa.data.}}  # TODO
   {% endfor %}
 
   # CC/QAs Linkage

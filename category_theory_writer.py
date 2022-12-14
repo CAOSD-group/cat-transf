@@ -1,4 +1,3 @@
-import ast
 from typing import Any 
 
 import copy
@@ -10,11 +9,9 @@ from flamapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relati
 import utils
 
 
-CATEGORY_THEORY_TEMPLATE = 'category_theory_template.cql'
+CATEGORY_THEORY_TEMPLATE = 'category_theory_template_config_attr.cql'
 NUMERICAL_FEATURE_ATTRIBUTE = 'NF'
 NUMERICAL_FEATURE_DOMAIN = 'Int'
-
-
 
 
 
@@ -43,52 +40,52 @@ class CategoryTheoryWriter(ModelToText):
 def fm_to_categories(feature_model: FeatureModel, c_attr: list) -> str:
     template_loader = jinja2.FileSystemLoader(searchpath='./')
     environment = jinja2.Environment(loader=template_loader)
-    template = environment.get_template(CATEGORY_THEORY_TEMPLATE)
+    # template = environment.get_template(CATEGORY_THEORY_TEMPLATE)
     maps = get_maps(feature_model, c_attr)
-    content = template.render(maps)
+    # content = template.render(maps)
     return content
 
 
 def get_maps(feature_model: FeatureModel, c_attr: list=None) -> dict[str, str]:
     result = {}
     all_features_map = get_all_features_map(feature_model)
+    print(f'===========================================================')
+    print(f'ALL FEATURES MAP: {all_features_map}')
     feature_attributes_map = get_features_attributes_map(feature_model)
     result['features_list'] = ' '.join([f['id'] for f in all_features_map])
-    result['boolean_features_dict'] = [d for d in all_features_map if not is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
-    result['numerical_features_dict'] = [d for d in all_features_map if is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
+    result['boolean_features_dict'] = [d for d in all_features_map if not utils.is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
+    result['numerical_features_dict'] = [d for d in all_features_map if utils.is_numerical_feature(feature_model.get_feature_by_name(d['name']))]
     result['feature_attributes_dict'] = feature_attributes_map
     if not c_attr is None:
-        virtual_linkages = get_virtual_linkages(c_attr)
         id_dictionary = id_dict(c_attr)
 
         qn_map = get_qn_map(id_dictionary)
-        result['qn_list'] = ' '.join([qn for qn in qn_map])
+        result['qn_list'] = ' '.join([qn['id'] for qn in qn_map])
 
         qv_map = get_qv_map(id_dictionary)
-        result['qv_list'] = ' '.join([qv for qv in qv_map])
+        result['qv_list'] = ' '.join([qv['id'] for qv in qv_map])
 
         qd_map = get_qd_map(id_dictionary)
         result['qd_list'] = ' '.join([qd['id'] for qd in qd_map])
-        print(f'qd_map: {result["qd_list"]}')
 
-        qs_map = get_qs_map(c_attr)
-        result['qs_list'] = ' '.join([qs for qs in qs_map])
+        qs_map = get_qs_map(id_dictionary, qn_map, qv_map, qd_map)
+        result['qs_list'] = ' '.join([qs['id'] for qs in qs_map])
 
-        qas_map = get_qas_map(c_attr)
-        result['qas_list'] = ' '.join([qas for qas in qas_map])
+        qas_map = get_qas_map(c_attr, qn_map, qv_map, qd_map, qs_map)
+        result['qas_list'] = ' '.join([qa['qa_id'] for qa in qas_map])
 
-        ccs_map = get_ccs_map(c_attr)
-        result['ccs_list'] = ' '.join([ccs for ccs in ccs_map])
+        ccs_map = get_ccs_map(all_features_map, c_attr)
+        result['ccs_list'] = ' '.join([cc['cc_id'] for cc in ccs_map])
 
-        qmc_map = get_qmc_map(c_attr)
-        result['qmc_list'] = ' '.join([qmc for qmc in qmc_map])
+        qmc_map = get_qmc_map(qas_map, ccs_map)
+        result['qmc_list'] = ' '.join([qmc['id'] for qmc in qmc_map])
     
-        result['cc_virutal_linkages_dict'] = virtual_linkages
-        result['quality_names_dict'] = feature_attributes_map
-        result['quality_domains_dict'] = feature_attributes_map
-        result['quality_values_dict'] = feature_attributes_map
-        result['quality_attributes_dict'] = feature_attributes_map
-        result['quality_model_dict'] = feature_attributes_map
+        result['cc_virutal_linkages_dict'] = ccs_map
+        result['quality_names_dict'] = qn_map
+        result['quality_domains_dict'] = qd_map
+        result['quality_values_dict'] = qv_map
+        result['quality_attributes_dict'] = qas_map
+        result['quality_model_dict'] = qmc_map
     return result
 
 
@@ -99,7 +96,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
     features = [(feature_model.root, None)]
     while features:
         feature, parent = features.pop()
-        if not is_numerical_feature(feature):
+        if not utils.is_numerical_feature(feature):
             feature_id = f'f{count}'
             count += 1
             # Create dictionary for feature
@@ -115,7 +112,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
             result.append(feature_dict)
         else:
             # It is numerical feature
-            for v in get_numerical_value(feature):
+            for v in utils.get_numerical_value(feature):
                 feature_id = f'nf{nf_count}'
                 nf_count += 1
                 # Create dictionary for feature
@@ -155,15 +152,6 @@ def get_features_attributes_map(feature_model: FeatureModel) -> list[dict[str, A
         result.append({'name': k, 'type': t})
     return result
 
-def get_numerical_value(feature: Feature) -> list[Any]:
-    values = []
-    for attribute in feature.get_attributes():
-        if attribute.name == NUMERICAL_FEATURE_ATTRIBUTE:
-            values = ast.literal_eval(attribute.get_default_value())
-            if len(values) == 2:
-                values = range(values[0], values[1] + 1)
-    return values
-
 
 
     # for i, feature in enumerate(features, 1):
@@ -197,33 +185,45 @@ def get_parent_id(result: list[dict[str, str]], parent: Feature, feature_id: str
     return next((f['id'] for f in result if f['name'] == parent.name), None)
 
 
-def is_numerical_feature(feature: Feature) -> bool:
-    return any(attribute for attribute in feature.get_attributes() if attribute.get_name() == NUMERICAL_FEATURE_ATTRIBUTE)
 
-def get_virtual_linkages(c_attr: list[tuple]):
-    # virtual_linkages_dict = {}
-    # for i, tuple in c_attr:
-    #     virtual_linkages_dict['id'] = c_attr[i]
-    #     features = tuple[0]
-    #     for feature in features:
-    #         virtual_linkages_dict['feature'] = 
-    pass
-
-def get_qn_map(id_dict: dict[int, dict[str, Any]]):
+def get_qn_map(id_dict: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
+    names = set()
     qns = []
-    for value in id_dict.values():
-        qns.append(value['id'])
+    for dic in id_dict.values():
+        name = dic['name']
+        names.add(name)
+    qn_count = 1
+    for n in names:
+        qn = {}
+        qn_id = f'qn{qn_count}'
+        qn_count += 1
+        qn['id'] = qn_id
+        qn['name'] = n
+        qns.append(qn)
+    print(f'qns: {qns}')
+    print(f'===========================================================')
     return qns
 
-def get_qv_map(id_dict: dict[int, dict[str, Any]]):
+def get_qv_map(id_dict: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
+    values = set()
     qvs = []
-    for value in id_dict.values():
-        values = value['attributes']
-        for val in values:
-            qvs.append(val)
+    for dic in id_dict.values():
+        value = dic['values']
+        for val in value:
+            values.add(val)
+    qv_count = 1
+    for v in values:
+        qv = {}
+        qv_id = f'qv{qv_count}'
+        qv_count += 1
+        qv['id'] = qv_id
+        qv['value'] = v
+        qvs.append(qv)
+    print(f'qvs: {qvs}')
+    print(f'===========================================================')
     return qvs
 
-def get_qd_map(id_dict: dict[int, dict[str, Any]]):
+def get_qd_map(id_dict: dict[int, dict[str, Any]]) -> list[dict[str, Any]]:
     domains = set()
     qds = []
     for value in id_dict.values():
@@ -235,21 +235,118 @@ def get_qd_map(id_dict: dict[int, dict[str, Any]]):
         qd_id = f'qd{qd_count}'
         qd_count += 1
         qd['id'] = qd_id
-        qd['name'] = dom
+        qd['domain'] = dom
         qds.append(qd)
+    print(f'qds: {qds}')
+    print(f'===========================================================')
     return qds
 
-def get_qs_map(c_attr: list):
-    pass
+def get_qs_map(id_dict: dict[int, dict[str, Any]], qn: list[dict[str, Any]],
+                                                   qv: list[dict[str, Any]],
+                                                   qd: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    values_set = set()
+    qs_map = []
+    id_counter = 1
+    for info in id_dict.values():
+        for value in info['values']:
+            qn_id = next(n['id'] for n in qn if n['name'] == info['name'])
+            qv_id = next(v['id'] for v in qv if v['value'] == value)
+            qd_id = next(d['id'] for d in qd if d['domain'] == info['domain'])
+            values_for_set = qn_id, qv_id, qd_id
+            values_set.add(values_for_set)
+    for val in values_set:
+        qs_dict = {}
+        qs_id = f'qs{id_counter}'
+        id_counter += 1
+        qs_dict['id'] = qs_id
+        qs_dict['qn'] = val[0]
+        qs_dict['qv'] = val[1]
+        qs_dict['qd'] = val[2]
+        qs_map.append(qs_dict)
+    print(f'qs_dict: {qs_map}')
+    print(f'===========================================================') 
+    return qs_map
 
-def get_qas_map(c_attr: list):
-    pass
+def get_qas_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]], 
+            qn_list: list[dict[str, Any]],
+            qv_list: list[dict[str, Any]],
+            qd_list: list[dict[str, Any]],
+            qs_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    qa_map = []
+    id_counter = 1
+    qa_counter = 1
+    for tup in c_attr:
+        attr = tup[1]
+        tuple_index = next(attr for attr in attr.keys())
+        attributes_dict = next(attr for attr in attr.values())
+        for key, value in attributes_dict.items():
+            qs_ids = {}
+            qa_id = f'qa{qa_counter}'
+            qa_counter += 1
+            qn = next((n['id'] for n in qn_list if n['name'] == key), None)
+            qv = next((v['id'] for v in qv_list if v['value'] == value), None)
+            qd = next((d['id'] for d in qd_list if d['domain'] == utils.parse_type_value(str(value))), None)
+            qs = next((s['id'] for s in qs_list if s['qn'] == qn and s['qv'] == qv and s['qd'] == qd), None)
 
-def get_ccs_map(c_attr: list):
-    pass
+            qs_ids['index'] = id_counter
+            qs_ids['qa_id'] = qa_id
+            qs_ids['qs_id'] = qs
+            qs_ids['tuple_index'] = tuple_index
+            qa_map.append(qs_ids)
+        id_counter += 1
+    print(f'qas_map: {qa_map}')
+    return qa_map
 
-def get_qmc_map(c_attr: list):
-    pass
+def get_ccs_map(features_map: list[dict[str, Any]],
+                c_attr: list[tuple[list, dict[int, dict[str, Any]]]]):
+    ccs_map = []
+    ccs_id_counter = 1
+    ccs_counter = 1
+    for tup in c_attr:
+        attr = tup[1]
+        features_list = tup[0]
+        tuple_index = next(attr for attr in attr.keys())
+        for feature in features_list:
+            ccs_dict = {}
+            ccs_id = f'cc{ccs_counter}'
+            ccs_counter += 1
+            if utils.is_numerical_feature(feature):
+                pass
+                # features_same_name = [f for f in features_map if feature.name == f['name']]
+                # print(f'feature_same_name: {features_same_name}')
+                # print(f'numerical_feature_value: {utils.get_numerical_value(feature)}')
+                # ccs_map['feature'] = next(f['id'] for f in features_same_name if 
+                #                           utils.get_numerical_value(feature) == f['nf_value'])
+            else:
+                ccs_dict['index'] = ccs_id_counter
+                ccs_dict['cc_id'] = ccs_id
+                ccs_dict['feature_id'] = next(f['id'] for f in features_map if feature.name == f['name'])
+                ccs_dict['tuple_index'] = tuple_index
+                ccs_map.append(ccs_dict)
+        ccs_id_counter += 1
+    print(f'===========================================================') 
+    print(f'ccs_map: {ccs_map}')
+    return ccs_map
+
+def get_qmc_map(qas: list[dict[str, Any]], ccs: list[dict[str, Any]]):
+    qmc_map = []
+    qmc_counter = 1
+    for ccs_item in ccs:
+        qmc_dict = {}
+        for qas_item in qas:
+            if ccs_item['tuple_index'] == qas_item['tuple_index']:
+                qmc_id = f'qmc{qmc_counter}'
+                qmc_dict['id'] = qmc_id
+                qmc_dict['qa_psi'] = qas_item['index']
+                qmc_dict['cc_phi'] = ccs_item['index']
+            qmc_map.append(qmc_dict)
+        qmc_counter += 1
+    print(f'===========================================================') 
+    print(f'qmc_dict: {qmc_map}')
+    return qmc_map
+
+
+
 
 def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, dict[str, Any]]:
     for tup in c_attr:
@@ -258,9 +355,7 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
         attributes_dict = next(attr for attr in attributes_tuple.values())
         qn_count = 0
         for attribute, values in attributes_dict.items():
-            qn_id = f'qn{qn_count+1}'
             qn_dict = {}
-            qn_dict['id'] = qn_id
             qn_dict['name'] = attribute
             qn_dict['domain'] = utils.parse_type_value(str(values))
             id_dict[qn_count] = qn_dict
@@ -274,23 +369,29 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
             for id in id_dict.keys():
                 for tupl in c_attr:
                     id_dict_value = id_dict[id]
-                    id_dict_value['attributes'] = qv_values[id]
+                    id_dict_value['values'] = qv_values[id]
+    print(f'===========================================================')
     print(f'id_dict: {id_dict}')
-    
+    print(f'===========================================================')
     return id_dict
 
 def get_qv(c_attr: list[tuple[list, dict[int, dict[str, Any]]]], qn_dict: dict[int, dict[str, Any]]) -> Any:
     copy_c_attr = copy.deepcopy(c_attr)
-    qv_count = 1
     values_dict = {}
     for id in qn_dict.keys():
-        separated_dict = {}
+        qv_set = []
         for tup in copy_c_attr:
             attr_dict = tup[1]
             attributes = next(attr for attr in attr_dict.values())
-            qv_id = f'qv{qv_count}'
-            qv_count += 1
-            separated_dict[qv_id] = next(attr for attr in attributes.values())
+            qv_set.append(next(attr for attr in attributes.values()))
             attributes.pop(next(attr for attr in attributes.keys()))
-        values_dict[id] = separated_dict
+        values_dict[id] = qv_set
     return values_dict
+
+def get_ids_from_dict(data: list[dict[str, Any]]) -> list[str]:
+    result = []
+    for d in data:
+        item = d['data']
+        for id in item:
+            result.append(id)
+    return result

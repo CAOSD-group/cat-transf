@@ -38,7 +38,7 @@ class ConfigurationsAttributesReader(TextToModel):
             reader = csv.DictReader(csvfile, delimiter=',', quotechar='"', skipinitialspace=True)
 
             content_list = []
-            index = 0
+            index = 1
             for row in reader:
                 content_list.append(from_csv_to_configurations(self.source_model, row, index))
                 index += 1
@@ -64,7 +64,7 @@ def from_csv_to_configurations(fm: FeatureModel, content: dict[str, str], index:
                 configuration_list.append(feature)
         else:
             attr_type = utils.parse_type_value(value)
-            attributes_dict[key] = utils.return_value_with_type(value, attr_type)
+            attributes_dict[key] = utils.return_parsed_value(value, attr_type)
             index_attributes_dict[index] = attributes_dict
 
     configurations_tuple = [f.name for f in configuration_list], index_attributes_dict
