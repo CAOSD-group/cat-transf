@@ -92,7 +92,7 @@ schema VariabilityModelCategory = literal : Ty {
   
   # Quality Model Arrows
   name        : Qn -> String  # Quality Name
-  value       : Qv -> Integer # Quality Numerical Value
+  value       : Qv -> String # Quality Numerical Value
   domain      : Qd -> String  # Quality Domain
   
   # IDs for one to many relationship
@@ -125,49 +125,39 @@ instance VariabilityModelData = literal : VariabilityModelCategory {
 
   equations
   # Boolean features
-    {% for feature in boolean_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}}
-    {% for attribute in feature.attributes %}  {{attribute.name}}({{feature.id}}) = {{attribute.value}}
-    {% endfor %}
-    {% endfor %}
+  {% for feature in boolean_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
+  {% endfor %}
+  {% endfor %}
 
   # Numerical features
-  {% for feature in numerical_features_dict %}
-  name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} domain({{feature.id}}) = {{feature.domain}} value({{feature.id}}) = {{feature.nf_value}}
-  {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
+  {% for feature in numerical_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} domain({{feature.id}}) = {{feature.domain}} value({{feature.id}}) = {{feature.nf_value}} {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
   {% endfor %}
   {% endfor %}
 
   # CC Virtual Linkages
-  {% for cc in cc_virutal_linkages_dict %}
-  id({{cc.id}}) = {{cc.id}} feature({{cc.id}}) = {{feature.id}}
+  {% for cc in cc_virutal_linkages_dict %} id({{cc.cc_id}}) = {{cc.index}} feature({{cc.cc_id}}) = {{cc.feature_id}}
   {% endfor %}
 
 
   # Variant-wise Quality Names and Domains
-  {% for qn in quality_names_dict %}
-  name({{qn.id}}) = {{qn.name}}
+  {% for qn in quality_names_dict %} name({{qn.id}}) = {{qn.name}}
   {% endfor %}
-  {% for qd in quality_domains_dict %}
-  domain({{qd.id}}) = {{qd.domain}}
+  {% for qd in quality_domains_dict %} domain({{qd.id}}) = {{qd.domain}}
   {% endfor %}
 
   # Quality Values
-  {% for qv in quality_values_dict %}
-  domain({{qv.id}}) = {{qv.value}}
+  {% for qv in quality_values_dict %} value({{qv.id}}) = {{qv.value}}
   {% endfor %}
 
   # Qualities
-  {% for qs in qualities_dict %}
-  name({{qs.id}}) = {{sq.value.qn}} value({{qs.id}}) = {{sq.value.qv}} domain({{qs.id}}) = {{sq.value.qd}}
+  {% for qs in qualities_dict %} name({{qs.id}}) = {{qs.qn}} value({{qs.id}}) = {{qs.qv}} domain({{qs.id}}) = {{qs.qd}}
   {% endfor %}
 
   # QAs Sets
-  {% for qa in quality_attributes_dict %}
-  id({{qa}}) = {{qa.index}} qualities({{qa}}) = {{qa.data.}}  # TODO
+  {% for qa in quality_attributes_dict %} id({{qa.qa_id}}) = {{qa.index}} qualities({{qa.qa_id}}) = {{qa.qs_id}}
   {% endfor %}
 
   # CC/QAs Linkage
-  {% for qan in quality_model_dict %}
-  phi({{qmcn}}) = {{TODO}} psi({{qmcn}}) = {{TODO}}  # TODO
+  {% for qmc in quality_model_dict %} phi({{qmc.id}}) = {{qmc.cc_phi}} psi({{qmc.id}}) = {{qmc.qa_psi}}
   {% endfor %}
 }

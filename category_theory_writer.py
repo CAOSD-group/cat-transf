@@ -40,9 +40,9 @@ class CategoryTheoryWriter(ModelToText):
 def fm_to_categories(feature_model: FeatureModel, c_attr: list) -> str:
     template_loader = jinja2.FileSystemLoader(searchpath='./')
     environment = jinja2.Environment(loader=template_loader)
-    # template = environment.get_template(CATEGORY_THEORY_TEMPLATE)
+    template = environment.get_template(CATEGORY_THEORY_TEMPLATE)
     maps = get_maps(feature_model, c_attr)
-    # content = template.render(maps)
+    content = template.render(maps)
     return content
 
 
@@ -84,6 +84,7 @@ def get_maps(feature_model: FeatureModel, c_attr: list=None) -> dict[str, str]:
         result['quality_names_dict'] = qn_map
         result['quality_domains_dict'] = qd_map
         result['quality_values_dict'] = qv_map
+        result['qualities_dict'] = qs_map
         result['quality_attributes_dict'] = qas_map
         result['quality_model_dict'] = qmc_map
     return result
@@ -112,7 +113,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
             result.append(feature_dict)
         else:
             # It is numerical feature
-            for v in utils.get_numerical_value(feature):
+            for v in utils.get_numerical_values(feature):
                 feature_id = f'nf{nf_count}'
                 nf_count += 1
                 # Create dictionary for feature
@@ -249,9 +250,9 @@ def get_qs_map(id_dict: dict[int, dict[str, Any]], qn: list[dict[str, Any]],
     id_counter = 1
     for info in id_dict.values():
         for value in info['values']:
-            qn_id = next(n['id'] for n in qn if n['name'] == info['name'])
-            qv_id = next(v['id'] for v in qv if v['value'] == value)
-            qd_id = next(d['id'] for d in qd if d['domain'] == info['domain'])
+            qn_id = next((n['id'] for n in qn if n['name'] == info['name']), None)
+            qv_id = next((v['id'] for v in qv if v['value'] == value), None)
+            qd_id = next((d['id'] for d in qd if d['domain'] == info['domain']), None)
             values_for_set = qn_id, qv_id, qd_id
             values_set.add(values_for_set)
     for val in values_set:
@@ -277,8 +278,7 @@ def get_qas_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]],
     qa_counter = 1
     for tup in c_attr:
         attr = tup[1]
-        tuple_index = next(attr for attr in attr.keys())
-        attributes_dict = next(attr for attr in attr.values())
+        attributes_dict = next((attr for attr in attr.values()), None)
         for key, value in attributes_dict.items():
             qs_ids = {}
             qa_id = f'qa{qa_counter}'
@@ -291,7 +291,6 @@ def get_qas_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]],
             qs_ids['index'] = id_counter
             qs_ids['qa_id'] = qa_id
             qs_ids['qs_id'] = qs
-            qs_ids['tuple_index'] = tuple_index
             qa_map.append(qs_ids)
         id_counter += 1
     print(f'qas_map: {qa_map}')
@@ -303,25 +302,31 @@ def get_ccs_map(features_map: list[dict[str, Any]],
     ccs_id_counter = 1
     ccs_counter = 1
     for tup in c_attr:
-        attr = tup[1]
         features_list = tup[0]
-        tuple_index = next(attr for attr in attr.keys())
         for feature in features_list:
             ccs_dict = {}
             ccs_id = f'cc{ccs_counter}'
             ccs_counter += 1
             if utils.is_numerical_feature(feature):
-                pass
-                # features_same_name = [f for f in features_map if feature.name == f['name']]
-                # print(f'feature_same_name: {features_same_name}')
-                # print(f'numerical_feature_value: {utils.get_numerical_value(feature)}')
-                # ccs_map['feature'] = next(f['id'] for f in features_same_name if 
-                #                           utils.get_numerical_value(feature) == f['nf_value'])
+                features_same_name = [f for f in features_map if feature.name == f['name']]
+                numerical_value = utils.get_numerical_value_instance(feature)
+                print(f'===========================================================')
+                print(f'feature: {feature}')
+                print(f'features_same_name: {features_same_name}')
+                print(f'numerical_feature_value: {numerical_value}')
+                ccs_dict['index'] = ccs_id_counter
+                ccs_dict['cc_id'] = ccs_id
+                print(f'list of feature in features_same_name: {[f["id"] for f in features_same_name if numerical_value == f["nf_value"]]}')
+                numerical_feature_id = next((f['id'] for f in features_same_name if numerical_value == f['nf_value']), None)
+                print(f'list of feature in features_same_name with next: {numerical_feature_id}')
+                ccs_dict['feature_id'] = next((f['id'] for f in features_same_name if 
+                                          numerical_value == f['nf_value']), None)
+                print(f'numerical feature id: {ccs_dict["feature_id"]}')
+                ccs_map.append(ccs_dict)
             else:
                 ccs_dict['index'] = ccs_id_counter
                 ccs_dict['cc_id'] = ccs_id
-                ccs_dict['feature_id'] = next(f['id'] for f in features_map if feature.name == f['name'])
-                ccs_dict['tuple_index'] = tuple_index
+                ccs_dict['feature_id'] = next((f['id'] for f in features_map if feature.name == f['name']), None)
                 ccs_map.append(ccs_dict)
         ccs_id_counter += 1
     print(f'===========================================================') 
@@ -329,17 +334,22 @@ def get_ccs_map(features_map: list[dict[str, Any]],
     return ccs_map
 
 def get_qmc_map(qas: list[dict[str, Any]], ccs: list[dict[str, Any]]):
+    qmc_set = set()
     qmc_map = []
-    qmc_counter = 1
+    
     for ccs_item in ccs:
-        qmc_dict = {}
         for qas_item in qas:
-            if ccs_item['tuple_index'] == qas_item['tuple_index']:
-                qmc_id = f'qmc{qmc_counter}'
-                qmc_dict['id'] = qmc_id
-                qmc_dict['qa_psi'] = qas_item['index']
-                qmc_dict['cc_phi'] = ccs_item['index']
-            qmc_map.append(qmc_dict)
+            if ccs_item['index'] == qas_item['index']:
+                ccs_tuple = ccs_item['index'], qas_item['index']
+                qmc_set.add(ccs_tuple)
+    qmc_counter = 1
+    for item in qmc_set:
+        qmc_dict = {}
+        qmc_id = f'qmc{qmc_counter}'
+        qmc_dict['id'] = qmc_id
+        qmc_dict['cc_phi'] = item[0]
+        qmc_dict['qa_psi'] = item[1]
+        qmc_map.append(qmc_dict)
         qmc_counter += 1
     print(f'===========================================================') 
     print(f'qmc_dict: {qmc_map}')
@@ -352,7 +362,7 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
     for tup in c_attr:
         id_dict = {}
         attributes_tuple = tup[1]
-        attributes_dict = next(attr for attr in attributes_tuple.values())
+        attributes_dict = next((attr for attr in attributes_tuple.values()), None)
         qn_count = 0
         for attribute, values in attributes_dict.items():
             qn_dict = {}
@@ -364,7 +374,7 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
     qv_values = get_qv(c_attr, id_dict)
     for tup in c_attr:
         attr_dict = tup[1]
-        attributes = next(attr for attr in attr_dict.values())
+        attributes = next((attr for attr in attr_dict.values()), None)
         for attr in attributes.keys():
             for id in id_dict.keys():
                 for tupl in c_attr:
@@ -382,9 +392,9 @@ def get_qv(c_attr: list[tuple[list, dict[int, dict[str, Any]]]], qn_dict: dict[i
         qv_set = []
         for tup in copy_c_attr:
             attr_dict = tup[1]
-            attributes = next(attr for attr in attr_dict.values())
-            qv_set.append(next(attr for attr in attributes.values()))
-            attributes.pop(next(attr for attr in attributes.keys()))
+            attributes = next((attr for attr in attr_dict.values()), None)
+            qv_set.append(next((attr for attr in attributes.values()), None))
+            attributes.pop(next((attr for attr in attributes.keys()), None))
         values_dict[id] = qv_set
     return values_dict
 

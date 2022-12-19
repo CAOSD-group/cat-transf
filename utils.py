@@ -1,3 +1,4 @@
+import random
 import ast
 from enum import Enum
 from typing import Any
@@ -15,7 +16,7 @@ class CTAttributeType(Enum):
 def is_numerical_feature(feature: Feature) -> bool:
     return any(attribute for attribute in feature.get_attributes() if attribute.get_name() == NUMERICAL_FEATURE_ATTRIBUTE)
 
-def get_numerical_value(feature: Feature) -> list[Any]:
+def get_numerical_values(feature: Feature) -> list[Any]:
     values = []
     for attribute in feature.get_attributes():
         if attribute.name == NUMERICAL_FEATURE_ATTRIBUTE:
@@ -23,6 +24,17 @@ def get_numerical_value(feature: Feature) -> list[Any]:
             if len(values) == 2:
                 values = range(values[0], values[1] + 1)
     return values
+
+def get_numerical_value_instance(feature: Feature) -> int:
+    value = get_numerical_values(feature)
+    for attribute in feature.get_attributes():
+        if attribute.name == NUMERICAL_FEATURE_ATTRIBUTE:
+            choice_list = ast.literal_eval(attribute.get_default_value())
+            if len(value) == 2:
+                choice_list = range(value[0], value[1] + 1)
+            chosen = random.randint(0, len(choice_list) - 1)
+            value = (choice_list[chosen])
+    return value
 
 def parse_type_value(value: str) -> str:
     """Given a value represented in a string, returns the associated type in category theory."""
