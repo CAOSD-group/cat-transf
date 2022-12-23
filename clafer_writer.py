@@ -1,9 +1,9 @@
 from pyexpat import features, model
 import re
 from typing import List
-from famapy.core.transformations import ModelToText
-from famapy.core.models.ast import ASTOperation
-from famapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relation, Constraint
+from flamapy.core.transformations import ModelToText
+from flamapy.core.models.ast import ASTOperation
+from flamapy.metamodels.fm_metamodel.models import FeatureModel, Feature, Relation, Constraint
 
 class ClaferWriter(ModelToText):
     """Transform a feature model to a Clafer format."""

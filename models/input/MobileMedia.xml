@@ -1,26 +1,41 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <featureModel>
+	<properties>
+		<graphics key="autolayoutconstraints" value="false"/>
+		<graphics key="legendautolayout" value="true"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
 	<struct>
 		<and mandatory="true" name="MobileMedia2">
 			<or mandatory="true" name="MediaSelection">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Photo"/>
 				<and name="Music">
+					<graphics key="collapsed" value="false"/>
 					<feature mandatory="true" name="MusicPlayer"/>
 				</and>
 				<feature name="Video"/>
 			</or>
 			<and mandatory="true" name="MediaManagement">
+				<graphics key="collapsed" value="false"/>
 				<and name="Favourites">
+					<graphics key="collapsed" value="false"/>
 					<feature mandatory="true" name="SetFavourites"/>
 					<feature mandatory="true" name="ViewFavourites"/>
 				</and>
 				<feature name="CopyMedia"/>
 				<and name="SMSTransfer">
+					<graphics key="collapsed" value="false"/>
 					<feature name="ReceivePhoto"/>
 					<feature name="SendPhoto"/>
 				</and>
 			</and>
 			<alt mandatory="true" name="ScreenSize">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Screen1"/>
 				<feature name="Screen2"/>
 				<feature name="Screen3"/>
@@ -31,6 +46,7 @@
 			<feature mandatory="true" name="CallManager"/>
 			<feature name="TVDigital"/>
 			<alt mandatory="true" name="OS">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Androide"/>
 				<feature name="WindowsMobile"/>
 				<feature name="Symbia"/>
@@ -38,8 +54,10 @@
 			</alt>
 			<feature name="TouchScreen"/>
 			<or name="Connectivity">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Bluetooth"/>
 				<or name="WiFi">
+					<graphics key="collapsed" value="false"/>
 					<feature name="Gmail"/>
 					<feature name="GoogleMaps"/>
 					<feature name="Youtube"/>
@@ -47,10 +65,12 @@
 			</or>
 			<feature name="GPS"/>
 			<alt name="ResolutionCamera">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Resolution3MP"/>
 				<feature name="Resolution8MP"/>
 			</alt>
 			<or mandatory="true" name="Language">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Portuguese"/>
 				<feature name="English"/>
 				<feature name="Spanish"/>

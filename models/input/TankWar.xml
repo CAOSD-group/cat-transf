@@ -1,12 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <featureModel>
+	<properties>
+		<graphics key="autolayoutconstraints" value="false"/>
+		<graphics key="legendautolayout" value="true"/>
+		<graphics key="showshortnames" value="false"/>
+		<graphics key="layout" value="horizontal"/>
+		<graphics key="showcollapsedconstraints" value="true"/>
+		<graphics key="legendhidden" value="false"/>
+		<graphics key="layoutalgorithm" value="1"/>
+	</properties>
 	<struct>
 		<and mandatory="true" name="TankWar">
 			<alt mandatory="true" name="Platform">
+				<graphics key="collapsed" value="false"/>
 				<feature name="PC"/>
 				<feature name="Handy"/>
 			</alt>
 			<or name="Tools">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Beschleunigung"/>
 				<feature name="einfrieren"/>
 				<feature name="Bombe"/>
@@ -16,35 +27,43 @@
 			</or>
 			<feature name="explodieren"/>
 			<and mandatory="true" name="GUI">
+				<graphics key="collapsed" value="false"/>
 				<alt mandatory="true" name="Map">
+					<graphics key="collapsed" value="false"/>
 					<feature name="M_240"/>
 					<feature name="M_600"/>
 					<feature name="M_780"/>
 				</alt>
 				<and name="Image">
+					<graphics key="collapsed" value="false"/>
 					<feature name="fuer_PC"/>
 					<feature name="fuer_Handy"/>
 					<feature name="IMG_tool"/>
 				</and>
 			</and>
 			<alt name="Record">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Re_fuer_PC"/>
 				<feature name="Re_fuer_Handy"/>
 			</alt>
 			<alt name="Soundeffekt">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Sound_fuer_pc"/>
 				<feature name="Sound_fuer_Handy"/>
 			</alt>
 			<alt mandatory="true" name="Language">
+				<graphics key="collapsed" value="false"/>
 				<feature name="EN"/>
 				<feature name="DE"/>
 			</alt>
 			<or mandatory="true" name="Tanks">
+				<graphics key="collapsed" value="false"/>
 				<feature name="USA_M1Abrams"/>
 				<feature name="Germany_Leopard"/>
 				<feature name="China_Type99"/>
 			</or>
 			<alt mandatory="true" name="AI">
+				<graphics key="collapsed" value="false"/>
 				<feature name="Easy"/>
 				<feature name="Hard"/>
 			</alt>

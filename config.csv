@@ -1,6 +1,6 @@
-Pizza,Topping,Salami,Ham,Mozzarella,Size,Normal,Big,Dough,Neapolitan,Sicilian,CheesyCrust,Salt,Pepper,Attribute1,Attribute2,Attribute3
-True,True,True,False,False,True,False,True,True,False,True,False,True,False,55,true,0.1107
-True,True,False,True,True,True,False,True,True,True,False,False,False,False,18,false,0.0451
-True,True,False,True,False,True,False,True,True,True,False,False,False,False,31,true,0.837
-True,True,True,False,False,True,False,True,True,False,True,True,False,False,44,true,0.2532
-True,True,True,True,False,True,True,False,True,True,False,False,True,True,62,false,0.3663
+Pizza,Topping,Salami,Ham,Mozzarella,Size,Normal,Big,Dough,Neapolitan,Sicilian,CheesyCrust,Salt,Pepper,Attribute1,Attribute2,Attribute3,Attribute4,Attribute5
+True,True,True,False,False,True,False,True,True,False,True,True,True,True,79,86,78,91,50
+True,True,True,True,True,True,False,True,True,True,False,False,True,True,71,30,49,34,81
+True,True,False,False,True,True,False,True,True,False,True,True,False,True,72,10,35,36,48
+True,True,False,True,True,True,False,True,True,False,True,True,False,False,96,86,37,56,25
+True,True,True,True,False,True,True,False,True,True,False,False,True,True,1,84,15,29,43

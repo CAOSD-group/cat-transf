@@ -35,13 +35,20 @@ typeside Ty = literal {
     le : Integer, Integer -> Bool = "(x, y) => (x < y)"
     leq : Integer, Integer -> Bool = "(x, y) => (x <= y)"
 
-    concat : String, Integer, String -> String = "(x, y, z) => (x + ' = ' + y.toString() + ' ' + z)"
+    concat : String, String, String -> String = "(x, y, z) => (x + ' = ' + y.toString() + ' ' + z)"
     regconcat : String, String -> String = "(x, y) => (x + ' & ' + y)"
     ifi : Bool, String, String -> String = "(x,a,b) => x ? a : b"
   
     trace2 : String, String, String, String, String -> String = "(a, b, c, d, e) => (a + ' -->(' + b + ') ' + c + ' -->(' + d + ') ' + e)"
     itrace2 : String, String, String, String, String, Integer, String -> String = "(a, b, c, d, e, f, g) => (a + ' -->(' + b + ') ' + c + ' -->(' + d + ') ' + e + ' = ' + f.toString() + ' ' + g)"
   
+    add  : Integer, Integer -> Integer = "(x, y) => (x + y)"
+    sub  : Integer, Integer -> Integer = "(x, y) => (x - y)"
+    mult : Integer, Integer -> Integer = "(x, y) => (x * y)"
+    div  : Integer, Integer -> Integer = "(x, y) => (x / y)"
+    mod  : Integer, Integer -> Integer = "(x, y) => (x % y)"
+
+
 }
 
 # Category 
@@ -125,7 +132,7 @@ instance VariabilityModelData = literal : VariabilityModelCategory {
 
   equations
   # Boolean features
-  {% for feature in boolean_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
+  {% for feature in boolean_features_dict %} name({{feature.id}}) = {{feature.name}} cardinality({{feature.id}}) = {{feature.cardinality}} optionality({{feature.id}}) = {{feature.optionality}} parent({{feature.id}}) = {{feature.parent}} domain({{feature.id}}) = {{feature.domain}} {% for attribute in feature.attributes %} {{attribute.name}}({{feature.id}}) = {{attribute.value}}
   {% endfor %}
   {% endfor %}
 

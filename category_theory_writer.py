@@ -110,6 +110,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
             feature_dict['attributes'] = [{'name': a.name, 'value': a.get_default_value()} 
                                             for a in feature.get_attributes() 
                                             if a.name != NUMERICAL_FEATURE_ATTRIBUTE]
+            feature_dict['domain'] = utils.CTAttributeType.BOOL.value
             result.append(feature_dict)
         else:
             # It is numerical feature
