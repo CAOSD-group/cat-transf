@@ -36,26 +36,17 @@ def get_numerical_value_instance(feature: Feature) -> int:
             value = (choice_list[chosen])
     return value
 
-def parse_type_value(value: str) -> str:
+def parse_type_value(value: Any) -> str:
     """Given a value represented in a string, returns the associated type in category theory."""
-    result = None
-    if value.lower() in ['true', 'false']:
-        result = CTAttributeType.BOOL
-    else:
-        try:
-            int(value)
-            result = CTAttributeType.INT
-        except:
-            pass
-        if result is None:
-            try:
-                float(value)
-                result = CTAttributeType.DOUBLE
-            except:
-                pass
-        if result is None:
-            result = CTAttributeType.STRING
-    return result.value
+    if isinstance(value, bool):
+        return CTAttributeType.BOOL.value
+    if isinstance(value, int):
+        return CTAttributeType.INT.value
+    if isinstance(value, float):
+        return CTAttributeType.DOUBLE.value
+    if isinstance(value, str):
+        return CTAttributeType.STRING.value
+    
 
 def return_parsed_value(value: str, type: str) -> Any:
     result = None

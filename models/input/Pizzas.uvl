@@ -5,9 +5,9 @@ features
 		mandatory
 			Topping	
 				or
-					Salami
+					Salami {Precio 2.1}
 					Ham
-					Mozzarella
+					Mozzarella {Coste 1}
 			Size	
 				alternative
 					Normal
@@ -16,9 +16,7 @@ features
 				alternative
 					Neapolitan
 					Sicilian
-
 		optional
-			CheesyCrust
-
+			CheesyCrust {vegan false}
 constraints
 	CheesyCrust => Big

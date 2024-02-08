@@ -1,4 +1,3 @@
-import os
 import random
 
 from flamapy.core.transformations import ModelToText

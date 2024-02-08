@@ -1,12 +1,10 @@
-import os
-import random
 import csv
 from typing import Any
 
 from flamapy.core.transformations import TextToModel
 from flamapy.metamodels.configuration_metamodel.models import Configuration
 from flamapy.metamodels.fm_metamodel.models import FeatureModel, Feature
-import utils
+from utils import utils
 
 
 CSV_SEPARATOR = ','
@@ -68,8 +66,6 @@ def from_csv_to_configurations(fm: FeatureModel, content: dict[str, str], index:
             index_attributes_dict[index] = attributes_dict
 
     configurations_tuple = [f.name for f in configuration_list], index_attributes_dict
-    print(f'configurations tuple: {configurations_tuple}')
-
     return configuration_list, index_attributes_dict
 
 
