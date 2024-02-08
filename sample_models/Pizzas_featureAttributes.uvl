@@ -5,9 +5,9 @@ features
 		mandatory
 			Topping	
 				or
-					Salami
-					Ham
-					Mozzarella
+					Salami {cost "1.5", vegan "false", provider "Aldi"}
+					Ham {cost "1.0", vegan "false", provider "Aldi"}
+					Mozzarella {cost "1.25", vegan "true", provider "Lidl"}
 			Size	
 				alternative
 					Normal
