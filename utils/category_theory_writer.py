@@ -22,7 +22,7 @@ class CategoryTheoryWriter(ModelToText):
     def get_destination_extension() -> str:
         return '.cql'
 
-    def __init__(self, path: str, source_model: FeatureModel, configurations_attr: list) -> None:
+    def __init__(self, path: str, source_model: FeatureModel, configurations_attr: list = None) -> None:
         self.path = path
         self.source_model = source_model
         self.configurations_attr = configurations_attr

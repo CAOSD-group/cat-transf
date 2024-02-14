@@ -60,6 +60,8 @@ def main(fm_path: str, sample_size: int, attributes_types: list[str] = []):
     configs_attrs_writter.set_attributes_types(attributes_types)
     configs_attrs_writter.transform()
 
+    output_path = os.path.join(OUTPUT_CQL_FOLDER, fm_name + CategoryTheoryWriter.get_destination_extension())
+    CategoryTheoryWriter(path=output_path, source_model=fm).transform()
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Feature Model to Category Theory.')
