@@ -2,10 +2,13 @@ import os
 import sys
 import argparse
 
+from flamapy.metamodels.configuration_metamodel.models import Configuration
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
 from flamapy.metamodels.bdd_metamodel.transformations import FmToBDD
-from flamapy.metamodels.bdd_metamodel.operations import BDDProducts, BDDSampling
+from flamapy.metamodels.bdd_metamodel.operations import BDDSampling
+from flamapy.metamodels.pysat_metamodel.operations import Glucose3Products
+from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat
 
 
 from utils.category_theory_writer import CategoryTheoryWriter
@@ -51,7 +54,13 @@ def main(fm_path: str, sample_size: int, attributes_types: list[str] = []):
     # Obtain the sample using the BDD
     bdd_model = FmToBDD(fm).transform()
     if sample_size is None:
-        products = BDDProducts().execute(bdd_model).get_result()
+        sat_model = FmToPysat(fm).transform()
+        products = Glucose3Products().execute(sat_model).get_result()
+        configs = []
+        for p in products:
+            elements = {f: True for f in p}
+            configs.append(Configuration(elements=elements))
+        products = configs
     else:
         products = BDDSampling(size=sample_size).execute(bdd_model).get_result()
 
