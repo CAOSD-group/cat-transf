@@ -9,10 +9,12 @@ from flamapy.metamodels.fm_metamodel.models import FeatureModel
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
 from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat
-from flamapy.metamodels.pysat_metamodel.operations import PySATProducts, PySATSampling
+from flamapy.metamodels.pysat_metamodel.operations import PySATProducts
 
 from flamapy.metamodels.bdd_metamodel.transformations import FmToBDD
 from flamapy.metamodels.bdd_metamodel.operations import BDDProductsNumber, BDDSampling
+
+from utils.pysat_sampling import PySATSampling
 
 
 CSV_SEPARATOR = ','
