@@ -9,7 +9,7 @@ from flamapy.metamodels.fm_metamodel.models import FeatureModel
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
 
 from flamapy.metamodels.pysat_metamodel.transformations import FmToPysat
-from flamapy.metamodels.pysat_metamodel.operations import PySATProducts
+from flamapy.metamodels.pysat_metamodel.operations import PySATProducts, PySATSampling
 
 from flamapy.metamodels.bdd_metamodel.transformations import FmToBDD
 from flamapy.metamodels.bdd_metamodel.operations import BDDProductsNumber, BDDSampling
@@ -34,7 +34,8 @@ def configurations_to_csv(fm: FeatureModel,
     
 
 def main(fm_filepath: str, 
-         sample_size: int = None):
+         sample_size: int = None,
+         uniform: bool = False):
     path, filename = os.path.split(fm_filepath)
     filename = '.'.join(filename.split('.')[:-1])
     
@@ -50,7 +51,12 @@ def main(fm_filepath: str,
         except:
             raise Exception(f'Error: Cannot build the BDD model.')
 
-    if sample_size is None or sample_size > n_configs:
+    if uniform:
+        print(f'#Sample size: {sample_size}')
+        with alive_bar(title=f'Generating {sample_size} configurations with BDD solver...') as bar:
+            configurations = BDDSampling(sample_size, with_replacement=False).execute(bdd_model).get_result()
+            bar()
+    else:
         if sample_size is None:
             sample_size = 'all'
         elif sample_size > n_configs:
@@ -60,17 +66,22 @@ def main(fm_filepath: str,
             sat_model = FmToPysat(fm).transform()
             bar()
         
-        with alive_bar(title=f'Generating {n_configs} configurations with SAT solver...') as bar:
-            configs = PySATProducts().execute(sat_model).get_result()
-            configurations = []
-            for config in configs:
-                configurations.append(Configuration({e: True for e in config}))
-            bar()
-    else:
-        print(f'#Sample size: {sample_size}')
-        with alive_bar(title=f'Generating {sample_size} configurations with BDD solver...') as bar:
-            configurations = BDDSampling(sample_size, with_replacement=False).execute(bdd_model).get_result()
-            bar()
+        if not isinstance(sample_size, str) and sample_size < n_configs:
+            with alive_bar(title=f'Generating {sample_size} configurations with SAT solver...') as bar:
+                sampling_op = PySATSampling()
+                sampling_op.set_size(sample_size)
+                configs = sampling_op.execute(sat_model).get_result()
+                configurations = []
+                for config in configs:
+                    configurations.append(Configuration({e: True for e in config}))
+                bar()
+        else:
+            with alive_bar(title=f'Generating {n_configs} configurations with SAT solver...') as bar:
+                configs = PySATProducts().execute(sat_model).get_result()
+                configurations = []
+                for config in configs:
+                    configurations.append(Configuration({e: True for e in config}))
+                bar()
     
     csv_output = os.path.join(path, f'{filename}_{sample_size}.csv')
     with alive_bar(title=f'Serializing configuration to csv file {csv_output}...') as bar:
@@ -82,6 +93,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Generate configurations from a feature model.')
     parser.add_argument(metavar='fm', dest='fm_filepath', type=str, help='Input feature model (.uvl).')
     parser.add_argument('-s', '--sample_size', dest='sample_size', type=int, required=False,  help="Number of configurations (default all).")
+    parser.add_argument('-u', '--uniform', dest='uniform', action='store_true', required=False,  help="Uniform random sampling (default False).")
     args = parser.parse_args()
 
-    main(args.fm_filepath, args.sample_size)
+    main(args.fm_filepath, args.sample_size, args.uniform)

@@ -32,9 +32,8 @@ def main(fm_path: str, csv_path: str):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Feature Model to Category Theory.')
-    parser.add_argument('-fm', '--featuremodel', dest='feature_model', type=str, required=True, help='Input feature model in UVL format.')
-    parser.add_argument('-csv', dest='csv', type=str, required=False, help='Input csv with configurations and attributes information.')
-    
+    parser.add_argument(metavar='fm', dest='fm_filepath', type=str, help='Input feature model (.uvl).')
+    parser.add_argument(metavar='csv', dest='csv_filepath', type=str, help='Input csv with configurations and attributes information.')
     args = parser.parse_args()
 
-    main(args.feature_model, args.csv)
+    main(args.fm_filepath, args.csv_filepath)

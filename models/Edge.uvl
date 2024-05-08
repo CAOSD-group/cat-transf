@@ -1,0 +1,34 @@
+features
+	EDGE {abstract}
+		mandatory
+			Interface
+				alternative
+					Mobile
+						alternative
+							G3
+							G4
+							G5
+							G6
+					WiFi
+						alternative
+							GHz24
+							GHz5
+					EthernetMbps {abstract}
+						alternative
+							EthernetMbps1
+							EthernetMbps10
+							EthernetMbps100
+			VNFs
+				alternative
+					Monitor
+					Firewall
+					Encryption 
+		optional
+			Antenna
+				alternative
+					Small
+					Medium
+					Large
+constraints
+	(Mobile | WiFi) => Antenna
+	EthernetMbps => ! Antenna

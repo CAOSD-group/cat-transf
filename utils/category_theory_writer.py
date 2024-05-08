@@ -324,7 +324,6 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
         attributes_dict = next((attr for attr in attributes_tuple.values()), None)
         qn_count = 0
         for attribute, values in attributes_dict.items():
-            print(f'values: {values}')
             qn_dict = {}
             qn_dict['name'] = attribute
             qn_dict['domain'] = utils.parse_type_value(values)
