@@ -20,7 +20,7 @@ class CategoryTheoryWriter(ModelToText):
 
     @staticmethod
     def get_destination_extension() -> str:
-        return '.cql'
+        return 'cql'
 
     def __init__(self, path: str, source_model: FeatureModel, configurations_attr: list = None) -> None:
         self.path = path
@@ -102,7 +102,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
             feature_dict['cardinality'] = get_cardinality(feature)
             feature_dict['optionality'] = str(feature.is_optional()).lower()
             feature_dict['parent'] = parent if parent is not None else feature_id
-            feature_dict['attributes'] = [{'name': a.name, 'value': a.get_default_value()} 
+            feature_dict['attributes'] = [{'name': a.name, 'value': utils.return_value_str(a.get_default_value())} 
                                             for a in feature.get_attributes() 
                                             if a.name != NUMERICAL_FEATURE_ATTRIBUTE]
             feature_dict['domain'] = utils.CTAttributeType.BOOL.value
@@ -119,7 +119,7 @@ def get_all_features_map(feature_model: FeatureModel) -> list[dict[str, Any]]:
                 feature_dict['cardinality'] = get_cardinality(feature)
                 feature_dict['optionality'] = str(feature.is_optional()).lower()
                 feature_dict['parent'] = parent if parent is not None else feature_id
-                feature_dict['attributes'] = [{'name': a.name, 'value': a.get_default_value()} 
+                feature_dict['attributes'] = [{'name': a.name, 'value': utils.return_value_str(a.get_default_value())} 
                                                 for a in feature.get_attributes() 
                                                 if a.name != NUMERICAL_FEATURE_ATTRIBUTE]
                 feature_dict['domain'] = utils.CTAttributeType.INT.value
@@ -258,7 +258,7 @@ def get_qas_map(c_attr: list[tuple[list, dict[int, dict[str, Any]]]],
             qa_counter += 1
             qn = next((n['id'] for n in qn_list if n['name'] == key), None)
             qv = next((v['id'] for v in qv_list if v['value'] == value), None)
-            qd = next((d['id'] for d in qd_list if d['domain'] == utils.parse_type_value(str(value))), None)
+            qd = next((d['id'] for d in qd_list if d['domain'] == utils.parse_type_value(value)), None)
             qs = next((s['id'] for s in qs_list if s['qn'] == qn and s['qv'] == qv and s['qd'] == qd), None)
 
             qs_ids['index'] = id_counter
@@ -324,9 +324,10 @@ def id_dict(c_attr: list[tuple[list, dict[int, dict[str, Any]]]]) -> dict[int, d
         attributes_dict = next((attr for attr in attributes_tuple.values()), None)
         qn_count = 0
         for attribute, values in attributes_dict.items():
+            print(f'values: {values}')
             qn_dict = {}
             qn_dict['name'] = attribute
-            qn_dict['domain'] = utils.parse_type_value(str(values))
+            qn_dict['domain'] = utils.parse_type_value(values)
             id_dict[qn_count] = qn_dict
             qn_count += 1
     

@@ -62,3 +62,14 @@ def return_parsed_value(value: str, type: str) -> Any:
     else:
         result = value
     return result
+
+
+def return_value_str(value: Any) -> Any:
+    if isinstance(value, bool):
+        return str(value).lower()
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float):
+        return value
+    if isinstance(value, str):
+        return f'"{value}"'
