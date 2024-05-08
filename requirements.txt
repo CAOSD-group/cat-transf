@@ -1,24 +1,28 @@
+about-time==4.2.1
 afmparser==1.0.3
-antlr-denter==1.3.1
+alive-progress==3.1.5
 antlr4-python3-runtime==4.13.1
-astutils==0.0.5
+astutils==0.0.6
 certifi==2024.2.2
 charset-normalizer==3.3.2
-dd==0.6.0
+dd==0.5.7
 falcon==2.0.0
 flamapy==1.6.0.dev0
-flamapy-bdd==1.6.0
-flamapy-fm==1.6.0.dev0
-flamapy-sat==1.1.7
-graphviz==0.20.1
+-e git+https://github.com/jmhorcas/bdd_metamodel.git@6e41a429438e1272407b12ac344d409bd6dd0ce5#egg=flamapy_bdd
+-e git+https://github.com/jmhorcas/fm_metamodel.git@cf6d912f4ad6ecadff5007b84082409e45e2e78f#egg=flamapy_fm
+-e git+https://github.com/flamapy/pysat_metamodel@fd0a0da5036a6bcf423ddbac1cd9932cd1cca927#egg=flamapy_sat
+grapheme==0.6.0
 hug==2.6.1
-idna==3.6
-Jinja2==3.1.3
+idna==3.7
+Jinja2==3.1.4
 MarkupSafe==2.1.5
-networkx==3.2.1
+networkx==3.3
 ply==3.10
-python-sat==0.1.8.dev15
+psutil==5.9.8
+pydot==2.0.0
+pyparsing==3.1.2
+python-sat==1.8.dev12
 requests==2.31.0
 six==1.16.0
-urllib3==2.2.0
+urllib3==2.2.1
 uvlparser==2.0.1
