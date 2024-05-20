@@ -2,10 +2,8 @@ import os
 import argparse
 from typing import Any
 
-from alive_progress import alive_bar, alive_it
-import numpy as np
+from alive_progress import alive_bar
 import matplotlib.pyplot as plt
-import matplotlib.ticker as mtick
 import seaborn as sns
 
 from flamapy.metamodels.fm_metamodel.transformations import UVLReader
@@ -204,10 +202,11 @@ def main(fm_path: str):
 
     with alive_bar(title=f'Calculating descriptive analysis...') as bar:
         dist_stats = descriptive_statistics(dist)
-        print('Descriptive analysis (number of features for a product):')
-        for ds, dv in dist_stats.items():
-            print(f' |-{ds}: {dv}')
         bar()
+    print('Descriptive analysis (number of features for a product):')
+    for ds, dv in dist_stats.items():
+        print(f' |-{ds}: {dv}')
+
     
 
 
